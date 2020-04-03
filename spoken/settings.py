@@ -339,3 +339,35 @@ CACHES = {
         'TIMEOUT': 3600 * 24,
     }
 }
+
+
+SAML2_AUTH = {
+    # Metadata is required, choose either remote url or local file path
+    'METADATA_AUTO_CONF_URL': METADATA_AUTO_CONF_URL,
+    'METADATA_LOCAL_FILE_PATH': METADATA_LOCAL_FILE_PATH,
+
+    # Optional settings below
+    'DEFAULT_NEXT_URL': '/tutorial-search',  # Custom target redirect URL after the user get logged in. Default to /admin if not set. This setting will be overwritten if you have parameter ?next= specificed in the login URL.
+    'CREATE_USER': 'TRUE', # Create a new Django user when a new user logs in. Defaults to True.
+    'NEW_USER_PROFILE': {
+        'USER_GROUPS': ['nasscom'],  # The default group name when a new user logs in
+        'ACTIVE_STATUS': True,  # The default active status for new users
+        'STAFF_STATUS': True,  # The staff status for new users
+        'SUPERUSER_STATUS': False,  # The superuser status for new users
+    },
+    'ATTRIBUTES_MAP': {  # Change Email/UserName/FirstName/LastName to corresponding SAML2 userprofile attributes.
+        'email': 'Email',
+        'username': 'UserName',
+        'first_name': 'FirstName',
+        'last_name': 'LastName',
+    },
+    'TRIGGER': {
+        'CREATE_USER': 'path.to.your.new.user.hook.method',
+        'BEFORE_LOGIN': 'path.to.your.login.hook.method',
+    },
+    'ASSERTION_URL': ASSERTION_URL, # Custom URL to validate incoming SAML requests against
+    'ENTITY_ID': ENTITY_ID, # Populates the Issuer element in authn request
+    'NAME_ID_FORMAT': NAME_ID_FORMAT, # Sets the Format property of authn NameIDPolicy element
+    'USE_JWT': False, # Set this to True if you are running a Single Page Application (SPA) with Django Rest Framework (DRF), and are using JWT authentication to authorize client users
+    'FRONTEND_URL': 'http://localhost.com', # Redirect URL for the client if you are using JWT auth with DRF. See explanation below
+}

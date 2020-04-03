@@ -5,6 +5,7 @@ from cms.views import *
 from mdldjango.urls import *
 from django.contrib.sitemaps.views import sitemap
 from spoken.sitemaps import SpokenStaticViewSitemap
+from django_saml2_auth import views as sso
 
 app_name = 'cms'
 
@@ -26,6 +27,10 @@ urlpatterns = [
 
 	#sitemaps
     url(r'^sitemap\.xml/$', sitemap, {'sitemaps' : spoken_sitemaps } , name='spoken_sitemap'),
+
+	#sso
+	url(r'^saml2_auth/', include('django_saml2_auth.urls')),
+	url(r'accounts/sso/login', sso.signin, name='sso_login'),
 	
 	url(r'^(?P<permalink>.+)/$',  dispatcher, name="dispatcher"),
 
