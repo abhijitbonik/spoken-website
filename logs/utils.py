@@ -1,19 +1,22 @@
 import json
 from django.conf import settings
 import uuid
-from concurrent.futures import ThreadPoolExecutor
-from functools import wraps
+import asyncio
+import time
+import redis
 
-def create_thread(func):
-   @wraps(func)
-   def async_thread(data):
-       with ThreadPoolExecutor(max_workers=2) as executor:
-           executor.submit(func, data)
-   return async_thread
+redis_client = redis.Redis(
+    host='localhost',
+    port=6379
+)
 
-
-@create_thread
 def dump_json_logs(data):
-    with open(settings.MEDIA_ROOT+"logs/"+str(uuid.uuid4())+".json", 'w', encoding='utf-8') as f:
-        json.dump(data, f, ensure_ascii=False, indent=4)
-	
+
+    # enqueue job in the redis queue named 'tasks'
+    try:
+        redis_client.lpush('tasks', json.dumps(data))
+        # print ('\n\nLength of tasks queue: ' + str(redis_client.llen('tasks')))
+    except Exception as e:
+        print (e)
+
+    
