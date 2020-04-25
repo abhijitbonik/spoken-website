@@ -2,17 +2,16 @@ import redis
 import json
 from pymongo import MongoClient
 
-# Configure our redis client 
+# configurations for redis
 r = redis.Redis(
     host='localhost',
     port=6379
 )
 
-# Create and configure our pymongo client
-
-client = MongoClient()  # connect on the default host and port
-db = client.log_storage  # database
-log_collection = db.log_collection  # collection of database
+# create and configure the pymongo client
+client = MongoClient()
+db = client.log_storage
+log_collection = db.log_collection
 
 while True:
 
