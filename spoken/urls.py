@@ -21,7 +21,7 @@ urlpatterns = [
     url(r'^sitemap\.html$', sitemap, name='sitemap'),
     # Examples:
     url(r'^addu/$', add_user, name='addu'),
-    url(r'^NMEICT-Intro/$', nmeict_intro, name="nmeict_intro"),
+    # url(r'^NMEICT-Intro/$', nmeict_intro, name="nmeict_intro"),
     url(r'^tutorial-search/$', tutorial_search, name="tutorial-search"),
     url(r'^series/$', series_foss, name="series"),
     url(r'^series_tutorial-search/$',  series_tutorial_search, name="series-tutorial-search"),
@@ -124,6 +124,7 @@ urlpatterns = [
 
     # events2
     # url(r'^events2/', include('events2.urls', namespace='events2')),
+    url(r'^cron/', include('cron.urls', namespace='cron')),
 
     # cms
     url(r'^', include('cms.urls', namespace='cms')),
