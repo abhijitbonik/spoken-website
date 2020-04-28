@@ -96,6 +96,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'ckeditor',
     'cron',
+    'logs',
 ]
 
 
@@ -335,9 +336,6 @@ MIDDLEWARE = [
 GEOIP_PATH  = BASE_DIR + '/geodb/'
 CORS_ORIGIN_ALLOW_ALL = True
 
-<<<<<<< HEAD
-ANALYTICS_DATA = ''
-=======
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
@@ -368,4 +366,5 @@ CKEDITOR_CONFIGS = {
         ]
     }
 }
->>>>>>> origin/logs
+
+ANALYTICS_DATA = ''

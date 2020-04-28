@@ -2,22 +2,9 @@ from .urls import EVENT_NAME_DICT
 import requests
 import json
 import re
-from .utils import dump_json_logs
-import asyncio
+from .tasks import dump_json_logs
 from django.urls import resolve
 
-
-def getLoop():
-
-    loop = None
-    
-    try:
-        loop = asyncio.get_event_loop()
-    except RuntimeError:
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-    
-    return loop
 
 class Logs:
 
@@ -43,8 +30,7 @@ class Logs:
                 data['visited_by'] = request.user.username if request.user.is_authenticated else 'anonymous'
                 data['ip_address'] = request.META['REMOTE_ADDR']
 
-                loop = getLoop()
-                loop.run_in_executor(None, dump_json_logs, data)
+                # dump_json_logs.delay(data)
                         
             else:
                 for key in EVENT_NAME_DICT.keys():
@@ -60,9 +46,8 @@ class Logs:
                         data['visited_by'] = request.user.username if request.user.is_authenticated else 'anonymous'
                         data['ip_address'] = request.META['REMOTE_ADDR']
                         
-                        loop = getLoop()
-                        loop.run_in_executor(None, dump_json_logs, data)
-                        
+                        # dump_json_logs.delay(data)
+
                         break
 
         except Exception as e:
