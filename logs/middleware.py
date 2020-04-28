@@ -17,7 +17,6 @@ class Logs:
         return self.get_response(request)
 
     def process_view(self, request, view_func, view_args, view_kwargs):
-        
         try:
             if request.META['PATH_INFO'] == '/' or re.match(r'/home/$', request.META['PATH_INFO']):
                 data = {}

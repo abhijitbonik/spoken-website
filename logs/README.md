@@ -59,13 +59,16 @@ event pattern - matches event. anything
 
 Using Geolite2 databases (free)  
 Downloaded the binaries and saved in geodb/. Total size ~ 68mb  
-Todo: cron job to update the db everyweek - https://mauteam.org/mautic/mautic-admins/solved-maxmind-geolite2-database-not-updating/
+We can extract the country, state code (more accurately, the region) and city with this.  
+
+Todo: cron job to update the db everyweek - https://mauteam.org/mautic/mautic-admins/solved-maxmind-geolite2-database-not-updating/    
 
 License  
 The GeoLite2 end-user license agreement, which incorporates components of the Creative Commons   Attribution-ShareAlike 4.0 International License can be found here. The attribution requirement may be met by   including the following in all advertising and documentation mentioning features of or use of this database:  
 
 This product includes GeoLite2 data created by MaxMind, available from  
 <a href="https://www.maxmind.com">https://www.maxmind.com</a>.  
+
 
 #### Added date & time to logs.
 

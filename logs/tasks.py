@@ -22,9 +22,11 @@ def dump_json_logs(self, data):
             location = g.city(data["ip_address"])  
             data["country"] = location["country_name"]
             data["city"] = location["city"]
+            data['state_code'] = location["region"]
         except AddressNotFoundError:
             data["country"] = "Unknown"
             data["city"] = "Unknown"
+            data['state_code'] = "Unknown"
 
         # next, saving in Mongo
         # todo
