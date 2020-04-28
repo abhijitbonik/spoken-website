@@ -58,7 +58,7 @@ event pattern - matches event. anything
 #### GeoIP2
 
 Using Geolite2 databases (free)  
-Downloaded the binaries and saved in geodb/. Total size ~ 30mb  
+Downloaded the binaries and saved in geodb/. Total size ~ 68mb  
 Todo: cron job to update the db everyweek - https://mauteam.org/mautic/mautic-admins/solved-maxmind-geolite2-database-not-updating/
 
 License  
@@ -67,6 +67,6 @@ The GeoLite2 end-user license agreement, which incorporates components of the Cr
 This product includes GeoLite2 data created by MaxMind, available from  
 <a href="https://www.maxmind.com">https://www.maxmind.com</a>.  
 
-
+#### Added date & time to logs.
 
 

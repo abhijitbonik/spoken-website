@@ -4,6 +4,7 @@ import json
 import re
 from .tasks import dump_json_logs
 from django.urls import resolve
+import datetime
 
 
 class Logs:
@@ -29,6 +30,9 @@ class Logs:
                 data['event_name'] = EVENT_NAME_DICT['home']['name']
                 data['visited_by'] = request.user.username if request.user.is_authenticated else 'anonymous'
                 data['ip_address'] = request.META['REMOTE_ADDR']
+                data['date'] = datetime.date.today()
+                data['time'] = datetime.datetime.now().time()
+                data['datetime'] = datetime.datetime.now()
 
                 dump_json_logs.delay(data)
                         
@@ -45,6 +49,9 @@ class Logs:
                         data['event_name'] = EVENT_NAME_DICT[key]['name']
                         data['visited_by'] = request.user.username if request.user.is_authenticated else 'anonymous'
                         data['ip_address'] = request.META['REMOTE_ADDR']
+                        data['date'] = datetime.date.today()
+                        data['time'] = datetime.datetime.now().time()
+                        data['datetime'] = datetime.datetime.now()
                         
                         dump_json_logs.delay(data)
 

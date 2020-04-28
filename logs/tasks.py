@@ -16,8 +16,6 @@ def dump_json_logs(self, data):
 
         # first, asynchronous call to GeoIP2 database
         g = GeoIP2()
-        data["country"] = ""
-        data["city"] = ""
 
         # todo: refine exception handling
         try:
@@ -25,7 +23,8 @@ def dump_json_logs(self, data):
             data["country"] = location["country_name"]
             data["city"] = location["city"]
         except AddressNotFoundError:
-            pass
+            data["country"] = "Unknown"
+            data["city"] = "Unknown"
 
         # next, saving in Mongo
         # todo

@@ -366,3 +366,5 @@ CKEDITOR_CONFIGS = {
         ]
     }
 }
+
+ANALYTICS_DATA = ''
