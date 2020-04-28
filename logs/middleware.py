@@ -30,7 +30,7 @@ class Logs:
                 data['visited_by'] = request.user.username if request.user.is_authenticated else 'anonymous'
                 data['ip_address'] = request.META['REMOTE_ADDR']
 
-                # dump_json_logs.delay(data)
+                dump_json_logs.delay(data)
                         
             else:
                 for key in EVENT_NAME_DICT.keys():
@@ -46,7 +46,7 @@ class Logs:
                         data['visited_by'] = request.user.username if request.user.is_authenticated else 'anonymous'
                         data['ip_address'] = request.META['REMOTE_ADDR']
                         
-                        # dump_json_logs.delay(data)
+                        dump_json_logs.delay(data)
 
                         break
 

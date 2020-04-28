@@ -24,7 +24,7 @@ parallely.
 
 # 27/04
 
-## Additional dependencies:
+### Additional dependencies:
 pip install celery
 
 The Django project has been setup to use a Celery task processing queue, with Redis as  
@@ -35,7 +35,7 @@ performance, set task failure behaviour, etc.
 
 # 28/04
 
-# Running a celery instance
+#### Running a celery instance
 
 Ensure that the redis server is running  
 
@@ -48,7 +48,25 @@ Ensure that the redis server is running
 - Added generic exception handling
 - Ignore backend results to improve performance
 
-# Mongo validation design
+#### Mongo validation design (in progress)
 
 path pattern: "^(/(.)*)*/$" - matches /.../.../
 event pattern - matches event. anything
+
+#### Merged logs branch into my branch
+
+#### GeoIP2
+
+Using Geolite2 databases (free)  
+Downloaded the binaries and saved in geodb/. Total size ~ 30mb  
+Todo: cron job to update the db everyweek - https://mauteam.org/mautic/mautic-admins/solved-maxmind-geolite2-database-not-updating/
+
+License  
+The GeoLite2 end-user license agreement, which incorporates components of the Creative Commons   Attribution-ShareAlike 4.0 International License can be found here. The attribution requirement may be met by   including the following in all advertising and documentation mentioning features of or use of this database:  
+
+This product includes GeoLite2 data created by MaxMind, available from  
+<a href="https://www.maxmind.com">https://www.maxmind.com</a>.  
+
+
+
+
