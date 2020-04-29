@@ -51,7 +51,8 @@ Ensure that the redis server is running
 #### Mongo validation design (in progress)
 
 path pattern: "^(/(.)*)*/$" - matches /.../.../
-event pattern - matches event. anything
+event pattern - matches event. anything  
+Todo: add bsontypes for "request_data", "view_args", "view_kwargs"  
 
 #### Merged logs branch into my branch
 
@@ -71,5 +72,19 @@ This product includes GeoLite2 data created by MaxMind, available from
 
 
 #### Added date & time to logs.
+
+# 29/04
+
+### Todo 
+make the shared_task function lighter?
+other mongo validations - check whether the db exists, collection exists.  
+add tzinfo  
+refine exception handling  
+move the database files from the repository to somewhere else?  
+
+### Ideas
+do the IP geolocation only once and store it in the session   
+
+
 
 
