@@ -4,9 +4,13 @@ from __future__ import absolute_import, unicode_literals
 from celery import shared_task
 from pymongo import MongoClient
 import json
-import datetime
 from django.contrib.gis.geoip2 import GeoIP2
 from geoip2.errors import AddressNotFoundError
+from logs.models import WebsiteLogs
+
+
+# initializing the GeoIP2 client
+g = GeoIP2()
 
 # using bind=True on the shared_task decorator to turn the below function
 # into a method of Task class. This lets us use self.retry for retrying
@@ -14,10 +18,9 @@ from geoip2.errors import AddressNotFoundError
 @shared_task(bind=True)
 def dump_json_logs(self, data):
 
-    try:
+    global g
 
-        # first, we make a call to the GeoIP2 database
-        g = GeoIP2()
+    try:
 
         # todo: refine exception handling
         try:
@@ -30,23 +33,10 @@ def dump_json_logs(self, data):
             data["city"] = "Unknown"
             data['state_code'] = "Unknown"
 
-        data['datetime'] = datetime.datetime.strptime(data['datetime'], '%Y-%m-%dT%H:%M:%S.%f')
-
-        # next, saving in Mongo
-
-        # create and configure the pymongo client
-        client = MongoClient()
-        db = client.logs
-        website_logs = db.website_logs
-
-        data_without__id = {}
-        for key, value in data.items():
-            if key != "_id":
-                data_without__id[key] = value
-
         # store in MongoDB
         try:
-            website_logs.insert_one(data_without__id)
+            WebsiteLogs.objects.create(path_info=data['path_info'], browser_info=data['browser_info'], method=data['method'], event_name=data['event_name'],
+                                       visited_by=data['visited_by'], ip_address=data['ip_address'], country=data['country'], state_code=data['state_code'], city=data['city'])
         except Exception as e:
             with open("mongo_errors_log.txt", "a") as f:
                 f.write(str(e) + "\n")

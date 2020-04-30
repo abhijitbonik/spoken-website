@@ -4,8 +4,6 @@ import json
 import re
 from .tasks import dump_json_logs
 from django.urls import resolve
-import datetime
-
 
 class Logs:
 
@@ -17,6 +15,7 @@ class Logs:
         return self.get_response(request)
 
     def process_view(self, request, view_func, view_args, view_kwargs):
+
         try:
             if request.META['PATH_INFO'] == '/' or re.match(r'/home/$', request.META['PATH_INFO']):
                 data = {}
@@ -29,7 +28,6 @@ class Logs:
                 data['event_name'] = EVENT_NAME_DICT['home']['name']
                 data['visited_by'] = request.user.username if request.user.is_authenticated else 'anonymous'
                 data['ip_address'] = request.META['REMOTE_ADDR']
-                data['datetime'] = datetime.datetime.utcnow()
 
                 dump_json_logs.delay(data)
                         
@@ -46,12 +44,12 @@ class Logs:
                         data['event_name'] = EVENT_NAME_DICT[key]['name']
                         data['visited_by'] = request.user.username if request.user.is_authenticated else 'anonymous'
                         data['ip_address'] = request.META['REMOTE_ADDR']
-                        data['datetime'] = datetime.datetime.utcnow()
                         
                         dump_json_logs.delay(data)
 
                         break
-
+        
         except Exception as e:
             print("Log Exception " + e)
+        
         return None

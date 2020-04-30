@@ -85,6 +85,16 @@ move the database files from the repository to somewhere else?
 ### Ideas
 do the IP geolocation only once and store it in the session   
 
+# 30/04
+
+Please run  
+pip install -U pymongo==3.2.1
+pip install -U six==1.12
+pip install -U mongoengine==0.9.0 (maybe not reqd)
+pip install -U djongo==1.2.23
+
+
+
 
 
 
