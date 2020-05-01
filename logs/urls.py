@@ -1,6 +1,13 @@
 
 EVENT_NAME_DICT={
     # maps root
+    r'^/$' : {
+        'name' : 'event.home.view'
+    },
+
+    r'^/home/$' : {
+        'name' : 'event.home.view'
+    },
 
     r'^/watch/([0-9a-zA-Z-+%\(\)., ]+)/([0-9a-zA-Z-+%\(\)., ]+)/([a-zA-Z-]+)/$' : {
         'name' : 'event.video.watch'
@@ -54,7 +61,6 @@ EVENT_NAME_DICT={
         'name' : 'event.participant.login'
     },
 
-
     r'^/statistics/$' : {
         'name' : 'event.statistics'
     },
@@ -78,8 +84,5 @@ EVENT_NAME_DICT={
     r'^/statistics/academic-center/$' : {
         'name' : 'event.statistics.academic.center'
     },
-    
-    'home':{
-        'name' : 'event.home.view'
-    },
+
 }

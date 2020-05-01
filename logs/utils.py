@@ -1,3 +1,5 @@
+# currently this code does not serve any purpose
+
 import json
 from django.conf import settings
 import uuid

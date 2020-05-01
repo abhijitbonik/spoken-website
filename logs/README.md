@@ -87,11 +87,11 @@ do the IP geolocation only once and store it in the session
 
 # 30/04
 
-Please run  
-pip install -U pymongo==3.2.1
-pip install -U six==1.12
-pip install -U mongoengine==0.9.0 (maybe not reqd)
-pip install -U djongo==1.2.23
+- Fixed regex matching in middleware  
+- Applied validation schema to the logs_websitelogs MongoDB collection (check schema.txt for the applied schema). It does additional validations like comparing with RegEx's, etc. that the Djongo model does not do.  
+- Refined error handling for GeoIP
+- Updated requirements file
+
 
 
 

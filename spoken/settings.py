@@ -175,7 +175,7 @@ DATABASES = {
     'logs': {
         'ENGINE': 'djongo',
         'NAME': 'logs',
-        'ENFORCE_SCHEMA': False,
+        'ENFORCE_SCHEMA': True,
         # 'HOST': 'localhost',
         # 'PORT': port_number,
         # 'USER': 'db-username',

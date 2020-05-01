@@ -1,3 +1,5 @@
+# currently this code does not serve any purpose
+
 from builtins import object
 
 
@@ -13,7 +15,7 @@ class LogsRouter(object):
 
     def db_for_write(self, model, **hints):
 
-        if model._meta.app_label in self.router.app_labels:
+        if model._meta.app_label == 'logs':
             return 'logs'
         return None
 
@@ -21,7 +23,4 @@ class LogsRouter(object):
         return True
 
     def allow_migrate(self, db, app_label, model_name=None, **hints):
-        
-        if app_label in self.route_app_labels:
-            return db == 'logs'
-        return None
+        return True

@@ -1,3 +1,5 @@
+# currently this code is not in use
+
 import redis
 import json
 from pymongo import MongoClient

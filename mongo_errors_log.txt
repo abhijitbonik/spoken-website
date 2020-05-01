@@ -1,3 +1,0 @@
-(1146, "Table 'spoken.logs_websitelogs' doesn't exist")
-(1146, "Table 'spoken.logs_websitelogs' doesn't exist")
-(1146, "Table 'spoken.logs_websitelogs' doesn't exist")
