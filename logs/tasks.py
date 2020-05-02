@@ -48,7 +48,8 @@ def dump_json_logs(self, data):
         # store in MongoDB
         try:
             WebsiteLogs.objects.using('logs').create(path_info=data['path_info'], browser_info=data['browser_info'], method=data['method'], event_name=data['event_name'],
-                                                     visited_by=data['visited_by'], ip_address=data['ip_address'], country=data['country'], state_code=data['state_code'], city=data['city'])
+                                                     visited_by=data['visited_by'], ip_address=data['ip_address'], country=data['country'], state_code=data['state_code'],
+                                                     city=data['city'], unique_visit=data['unique_visit'])
         except Exception as e:
             with open("logs/mongo_errors_log.txt", "a") as f:
                 f.write(str(e) + "\n")

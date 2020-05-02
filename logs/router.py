@@ -23,4 +23,7 @@ class LogsRouter(object):
         return True
 
     def allow_migrate(self, db, app_label, model_name=None, **hints):
-        return True
+        
+        if app_label in self.route_app_labels:
+            return db == 'logs'
+        return None 

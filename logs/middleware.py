@@ -19,14 +19,19 @@ class Logs:
                     data = {}
                     data['path_info'] = request.META['PATH_INFO']
                     data['browser_info'] = request.META['HTTP_USER_AGENT']
-                    data['request_data'] = dict(request.GET)
-                    data['method'] = request.method
-                    data['view_args'] = view_args
-                    data['view_kwargs'] = view_kwargs
                     data['event_name'] = EVENT_NAME_DICT[key]['name']
                     data['visited_by'] = request.user.username if request.user.is_authenticated else 'anonymous'
                     data['ip_address'] = request.META['REMOTE_ADDR']
+                    data['method'] = request.method
+
+                    if 'has_visited' in request.session:
+                        data['unique_visit'] = False
+                    else:
+                        data['unique_visit'] = True
+                        request.session['has_visited'] = True
                     
+                    request.session.set_expiry(15552000)  # 6 months, in seconds
+
                     # queueing the task in Celery by first sending it
                     # to a message broker (redis)
                     dump_json_logs.delay(data)  

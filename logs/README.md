@@ -85,12 +85,17 @@ move the database files from the repository to somewhere else?
 ### Ideas
 do the IP geolocation only once and store it in the session   
 
-# 30/04
+# 30/04, 01/05
 
 - Fixed regex matching in middleware  
 - Applied validation schema to the logs_websitelogs MongoDB collection (check schema.txt for the applied schema). It does additional validations like comparing with RegEx's, etc. that the Djongo model does not do.  
 - Refined error handling for GeoIP
-- Updated requirements file
+- Updated requirements file  
+- Timed the two asynchronous queries, querying geoip db is about 2 orders of magnitude faster than saving in mongo. Tried turning of schema validation, made no noticeable difference.
+
+# 02/05
+
+- Added unique/returning visits tracking (a visit is considered returning if the user has visited the website in the past 6 months, from the same browser)
 
 
 

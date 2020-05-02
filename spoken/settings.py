@@ -380,3 +380,5 @@ CKEDITOR_CONFIGS = {
 }
 
 ANALYTICS_DATA = ''
+
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False  # required for checking returning visits
