@@ -655,43 +655,46 @@
             var previousTime = 0;
             var currentTime = 0;
             trackedPlayer.on('timeupdate', function() {
-            previousTime = currentTime;
-            currentTime = trackedPlayer.currentTime();
-            var cur_time = formatTime(currentTime).toString();
 
-           	trigger( cur_time);
-							$("#text").click(function(e){
-							trackedPlayer.pause()
-		       		setForum(cur_time)
-		         
-		      		});
-            
-            var user_is_authenticated = {{ user.is_authenticated|yesno:"true,false" }};
-            
-            if (user_is_authenticated === true) {
+                // logic for updating tutorial timestamp
+                previousTime = currentTime;
+                currentTime = trackedPlayer.currentTime();
+                var cur_time = formatTime(currentTime).toString();
 
-                tutorial_progress_data = {
-                    csrfmiddlewaretoken: window.CSRF_TOKEN,
-                    username: "{{ user }}",
-                    foss: "{{ tr_rec.tutorial_detail.foss.foss }}",
-                    tutorial: "{{ tr_rec.tutorial_detail.tutorial }} - {{ tr_rec.language.name }}",
-                    timestamp: cur_time
-                }
+                trigger( cur_time);
+                                $("#text").click(function(e){
+                                trackedPlayer.pause()
+                        setForum(cur_time)
+                    
+                        });
+            
+                // logic for storing tutorial progress
+                var user_is_authenticated = {{ user.is_authenticated|yesno:"true,false" }};
                 
-                $.ajax({
-                        type: 'POST',
-                        url: 'http://localhost:8000/api/save_tutorial_progress/',
-                        data: tutorial_progress_data,
-                        success: function(response) { 
-                            console.log(response);
-                        },
-                        error: function(xhr, status, err) {
-                            console.log(xhr.responseText);
-                        }
-                    });
+                if (user_is_authenticated === true) {
 
-                });
-            } 
+                    tutorial_progress_data = {
+                        csrfmiddlewaretoken: window.CSRF_TOKEN,
+                        username: "{{ user }}",
+                        foss: "{{ tr_rec.tutorial_detail.foss.foss }}",
+                        tutorial: "{{ tr_rec.tutorial_detail.tutorial }} - {{ tr_rec.language.name }}",
+                        timestamp: cur_time
+                    }
+                    
+                    $.ajax({
+                            type: 'POST',
+                            url: 'http://localhost:8000/logs/save_tutorial_progress/',
+                            data: tutorial_progress_data,
+                            success: function(response) { 
+                                console.log(response);
+                            },
+                            error: function(xhr, status, err) {
+                                console.log(xhr.responseText);
+                            }
+                        });
+
+                    });
+                } 
   		
 				function setForum(cur_time)
 				{

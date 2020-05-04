@@ -1,4 +1,4 @@
-from .urls import EVENT_NAME_DICT
+from .urls_to_events import EVENT_NAME_DICT
 import re
 from .tasks import dump_json_logs
 import datetime

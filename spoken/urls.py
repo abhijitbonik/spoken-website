@@ -128,6 +128,9 @@ urlpatterns = [
 
     # cms
     url(r'^', include('cms.urls', namespace='cms')),
+
+    # logs
+    url(r'^logs/', include('logs.urls', namespace='logs')),
     
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
