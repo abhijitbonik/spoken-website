@@ -95,7 +95,12 @@ do the IP geolocation only once and store it in the session
 
 # 02/05
 
-- Added unique/returning visits tracking (a visit is considered returning if the user has visited the website in the past 6 months, from the same browser)
+- Added unique/returning visits tracking (a visit is considered returning if the user has visited the website in the past 6 months, from the same browser)  
+- Refining checking of returning visits by also checking username?
+
+# 04/05
+
+- Tutorial progress logs
 
 
 

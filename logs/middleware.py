@@ -1,6 +1,7 @@
 from .urls import EVENT_NAME_DICT
 import re
 from .tasks import dump_json_logs
+import datetime
 
 class Logs:
 
@@ -23,6 +24,7 @@ class Logs:
                     data['visited_by'] = request.user.username if request.user.is_authenticated else 'anonymous'
                     data['ip_address'] = request.META['REMOTE_ADDR']
                     data['method'] = request.method
+                    data['datetime'] = datetime.datetime.now()
 
                     if 'has_visited' in request.session:
                         data['unique_visit'] = False

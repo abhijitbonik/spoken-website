@@ -665,9 +665,33 @@
 		       		setForum(cur_time)
 		         
 		      		});
-			
-            });
- 
+            
+            var user_is_authenticated = {{ user.is_authenticated|yesno:"true,false" }};
+            
+            if (user_is_authenticated === true) {
+
+                tutorial_progress_data = {
+                    csrfmiddlewaretoken: window.CSRF_TOKEN,
+                    username: "{{ user }}",
+                    foss: "{{ tr_rec.tutorial_detail.foss.foss }}",
+                    tutorial: "{{ tr_rec.tutorial_detail.tutorial }} - {{ tr_rec.language.name }}",
+                    timestamp: cur_time
+                }
+                
+                $.ajax({
+                        type: 'POST',
+                        url: 'http://localhost:8000/api/save_tutorial_progress/',
+                        data: tutorial_progress_data,
+                        success: function(response) { 
+                            console.log(response);
+                        },
+                        error: function(xhr, status, err) {
+                            console.log(xhr.responseText);
+                        }
+                    });
+
+                });
+            } 
   		
 				function setForum(cur_time)
 				{

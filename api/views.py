@@ -180,3 +180,22 @@ def get_tutorialdetails(request, tutid):
         
         tutdict = json.dumps(tutdict)
         return HttpResponse(tutdict, content_type='application/json')
+
+# TODO: don't let users make their own post requests to this view
+def save_tutorial_progress (request):
+
+    if request.method != "POST":
+        return HttpResponse("You are not allowed to make that request to this page.")
+    
+    print ('\n\n')
+    username = request.POST.get("name")
+    foss = request.POST.get("foss")
+    tutorial = request.POST.get("tutorial")
+    timestamp = request.POST.get("timestamp")
+    print (username)
+    print (foss)
+    print (tutorial)
+    print (timestamp)
+    print ("\n\n")
+
+    return HttpResponse(status=200)
