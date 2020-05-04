@@ -5,6 +5,7 @@ from celery import shared_task
 from django.contrib.gis.geoip2 import GeoIP2
 from geoip2.errors import AddressNotFoundError
 from logs.models import WebsiteLogs
+from pymongo import MongoClient
 import re
 
 # initializing the GeoIP2 client
@@ -60,3 +61,38 @@ def dump_json_logs(self, data):
         # backoff. If the task fails more than max_retries + 1 times,
         # an error is display in the celery worker.
         self.retry(exc=exc, countdown=2 ** self.request.retries)
+
+# create and configure the pymongo client
+client = MongoClient()
+db = client.logs
+logs_tutorialprogresslogs = db.logs_tutorialprogresslogs
+
+@shared_task(bind=True)
+def update_tutorial_progress(self, data):
+
+    field = 'fosses.' + data['foss'] + '.' + data['tutorial']
+    time_field = field + '.curr_time' 
+    completed_field = field + '.completed'
+
+    # mark as complete if current timestamp >= 80% of total length of tutorial
+    if data['curr_time'] >= 0.8 * data['total_time']:
+
+        logs_tutorialprogresslogs.find_one_and_update(
+            { "username" : data['username'] }, 
+            { "$set" : { time_field : data["curr_time"], completed_field: True } },
+            upsert=True
+        )
+
+        return
+
+    # if curr_time is not yet 80% of total, OR
+    # if it was marked as complete earlier, 
+    # only update the curr_time
+
+    if logs_tutorialprogresslogs.find_one( { 'username': data['username'] })['fosses'][data['foss']][data['tutorial']] == True:
+        
+        logs_tutorialprogresslogs.find_one_and_update(
+            { "username" : data['username'] }, 
+            { "$set" : { time_field : data["curr_time"] } },
+            upsert=True
+        )

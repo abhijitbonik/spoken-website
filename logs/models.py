@@ -22,36 +22,3 @@ class WebsiteLogs (models.Model):
 
     objects = models.DjongoManager()
 
-
-# models for saving video logs
-
-class Tutorials(models.Model):
-    tutorial_id = models.CharField(max_length=100)
-    progress = models.IntegerField()
-    is_complete = models.BooleanField()
-
-    class Meta:
-        abstract = True
-
-
-class Fosses(models.Model):
-    foss_name = models.CharField(max_length=100)
-    progress_of_each_tutorial = models.ArrayModelField(
-        model_container=Tutorials
-    )
-
-    class Meta:
-        abstract = True
-
-
-class TutorialProgressLogs (models.Model):
-
-    username = models.CharField (max_length=100, blank=False, primary_key=True)
-    fosses = models.ArrayModelField(
-        model_container=Fosses
-    )
-    
-    def __str__(self):
-        return "Tutorial Progress Log Object"
-
-    objects = models.DjongoManager()

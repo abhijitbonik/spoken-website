@@ -678,7 +678,8 @@
                         username: "{{ user }}",
                         foss: "{{ tr_rec.tutorial_detail.foss.foss }}",
                         tutorial: "{{ tr_rec.tutorial_detail.tutorial }} - {{ tr_rec.language.name }}",
-                        timestamp: cur_time
+                        curr_time: cur_time,
+                        total_time: trackedPlayer.duration(),
                     }
                     
                     $.ajax({
