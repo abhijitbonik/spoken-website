@@ -74,25 +74,30 @@ def update_tutorial_progress(self, data):
     time_field = field + '.curr_time' 
     completed_field = field + '.completed'
 
-    # mark as complete if current timestamp >= 80% of total length of tutorial
-    if data['curr_time'] >= 0.8 * data['total_time']:
+    try:
+        # mark as complete if current timestamp >= 80% of total length of tutorial
+        if data['curr_time'] >= 0.8 * data['total_time']:
 
-        logs_tutorialprogresslogs.find_one_and_update(
-            { "username" : data['username'] }, 
-            { "$set" : { time_field : data["curr_time"], completed_field: True } },
-            upsert=True
-        )
+            logs_tutorialprogresslogs.find_one_and_update(
+                { "username" : data['username'] }, 
+                { "$set" : { time_field : data["curr_time"], completed_field: True } },
+                upsert=True
+            )
 
-        return
+            return
 
-    # if curr_time is not yet 80% of total, OR
-    # if it was marked as complete earlier, 
-    # only update the curr_time
+        # if curr_time is not yet 80% of total, OR
+        # if it was marked as complete earlier, 
+        # only update the curr_time
 
-    if logs_tutorialprogresslogs.find_one( { 'username': data['username'] })['fosses'][data['foss']][data['tutorial']] == True:
-        
+        # if logs_tutorialprogresslogs.find_one( { 'username': data['username'] })['fosses'][data['foss']][data['tutorial']] == True:
+            
         logs_tutorialprogresslogs.find_one_and_update(
             { "username" : data['username'] }, 
             { "$set" : { time_field : data["curr_time"] } },
             upsert=True
         )
+        
+    except Exception as e:
+        with open("logs/tutorial_errors_log.txt", "a") as f:
+                f.write(str(e) + "\n")

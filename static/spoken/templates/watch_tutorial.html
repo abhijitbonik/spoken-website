@@ -657,46 +657,73 @@
             trackedPlayer.on('timeupdate', function() {
 
                 // logic for updating tutorial timestamp
+
                 previousTime = currentTime;
                 currentTime = trackedPlayer.currentTime();
                 var cur_time = formatTime(currentTime).toString();
 
                 trigger( cur_time);
-                                $("#text").click(function(e){
-                                trackedPlayer.pause()
-                        setForum(cur_time)
-                    
-                        });
-            
+
+                $("#text").click(function(e){
+                    trackedPlayer.pause()
+                    setForum(cur_time)
+                });
+                
+                
                 // logic for storing tutorial progress
                 var user_is_authenticated = {{ user.is_authenticated|yesno:"true,false" }};
                 
-                if (user_is_authenticated === true) {
+                // function csrfSafeMethod(method) {
+                //     // these HTTP methods do not require CSRF protection
+                //     return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+                // }
+
+                // $.ajaxSetup({
+                //     beforeSend: function(xhr, settings) {
+                //         if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                //             xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                //         }
+                //     }
+                // });
+
+                //if (user_is_authenticated === true) {
+                
 
                     tutorial_progress_data = {
-                        csrfmiddlewaretoken: window.CSRF_TOKEN,
                         username: "{{ user }}",
                         foss: "{{ tr_rec.tutorial_detail.foss.foss }}",
                         tutorial: "{{ tr_rec.tutorial_detail.tutorial }} - {{ tr_rec.language.name }}",
-                        curr_time: cur_time,
-                        total_time: trackedPlayer.duration(),
+                        curr_time: currentTime,
+                        total_time: 30,
+                        csrfmiddlewaretoken: '{{ csrf_token }}',
                     }
                     
+                    $.ajaxSetup({
+                        beforeSend: function(xhr, settings) {
+                            if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
+                                // Only send the token to relative URLs i.e. locally.
+                                xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+                            }
+                        }
+                    });
                     $.ajax({
-                            type: 'POST',
-                            url: 'http://localhost:8000/logs/save_tutorial_progress/',
-                            data: tutorial_progress_data,
-                            success: function(response) { 
-                                console.log(response);
+                            "type": "POST",
+                            "url": "http://localhost:8000/logs/save_tutorial_progress/",
+                            "data": tutorial_progress_data,
+                            "beforeSend": function(xhr, settings) {
+                                console.log("Before Send");
+                                $.ajaxSettings.beforeSend(xhr, settings);
                             },
-                            error: function(xhr, status, err) {
+                            "success": function(response) { 
+                                console.log("Success");
+                            },
+                            "error": function(xhr, status, err) {
                                 console.log(xhr.responseText);
                             }
-                        });
-
                     });
-                } 
-  		
+                    
+                //}
+
 				function setForum(cur_time)
 				{
 					 
@@ -720,6 +747,7 @@
 						 var url = "https://forums.spoken-tutorial.org/new-question/?category={{ tr_rec.tutorial_detail.foss.foss }}&tutorial={{ tr_rec.tutorial_detail.tutorial }}&minute_range="+min_range+"&second_range="+sec_range;
 						$("#text").attr("href", url);
 				}
+            });
     </script>
 {% endblock %}
 {% block uncompressjsblock %}

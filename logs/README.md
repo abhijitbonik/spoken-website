@@ -104,6 +104,9 @@ do the IP geolocation only once and store it in the session
 - Attempted to create schema in Djongo
 - Scrapped Djongo schema, using Pymongo instead.
 
+# 05/05
+
+- AJAX POST request to save logs.
 
 
 
