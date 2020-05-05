@@ -89,8 +89,6 @@ def update_tutorial_progress(self, data):
         # if curr_time is not yet 80% of total, OR
         # if it was marked as complete earlier, 
         # only update the curr_time
-
-        # if logs_tutorialprogresslogs.find_one( { 'username': data['username'] })['fosses'][data['foss']][data['tutorial']] == True:
             
         logs_tutorialprogresslogs.find_one_and_update(
             { "username" : data['username'] }, 

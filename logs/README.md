@@ -107,6 +107,7 @@ do the IP geolocation only once and store it in the session
 # 05/05
 
 - AJAX POST request to save logs.
+- Added authentication checking for saving tutorial logs.
 
 
 

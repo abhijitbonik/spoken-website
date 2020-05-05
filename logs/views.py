@@ -17,9 +17,8 @@ def save_tutorial_progress (request):
     data['foss'] = request.POST.get("foss")
     data['tutorial'] = request.POST.get("tutorial")
     data['curr_time'] = int (float (request.POST.get("curr_time")))
-    data['total_time'] = int (float (request.POST.get("total_time")))
+    data['total_time'] = float (request.POST.get("total_time"))
 
-    # both, curr_time and total_time are in seconds (float)
     update_tutorial_progress.delay (data)
 
     return HttpResponse(status=200)
