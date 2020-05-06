@@ -109,6 +109,13 @@ do the IP geolocation only once and store it in the session
 - AJAX POST request to save logs.
 - Added authentication checking for saving tutorial logs.
 
+# 06/05
+
+- Continue video playing where the user had stopped last.
+- Currently assuming that the user only watches a given FOSS in one language.
+- Flower for monitoring
+- Update tutorial logs to contain visit number, timestamp, language, etc.
+
 
 
 

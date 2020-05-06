@@ -290,17 +290,56 @@ def watch_tutorial(request, foss, tutorial, lang):
             'tutorial_detail__foss__foss', 'tutorial_detail__level', 'tutorial_detail__order', 'language__name')
         questions = Question.objects.filter(category=td_rec.foss.foss.replace(
             ' ', '-'), tutorial=td_rec.tutorial.replace(' ', '-')).order_by('-date_created')
+        
+        start_time = 0
+        visit_count = 1
+
+        try:
+            if request.user.is_authenticated:
+
+                # create and configure the pymongo client.
+                # TODO: move this Mongo initialization code somewhere else.
+                from pymongo import MongoClient
+                client = MongoClient()
+                db = client.logs
+                logs_tutorialprogresslogs = db.logs_tutorialprogresslogs
+                user = logs_tutorialprogresslogs.find_one({ "username": str(request.user.username) })
+                
+                foss_name = str(tr_rec.tutorial_detail.foss.foss)
+                tutorial_name = str(tr_rec.tutorial_detail.tutorial) + ' - ' + str(tr_rec.language.name)
+                
+                # number of times visited previously
+                visit_count = user['fosses'][foss_name][tutorial_name]['visit_count']
+                visit_count += 1
+
+                start_time = user['fosses'][foss_name][tutorial_name]['curr_time'] * 60
+
+        except Exception as e:  # the user, if authenticated, has not viewed that tutorial previously.
+                                # leave the start time as 0 and visit count as 1 in this case
+            pass
+
     except Exception as e:
         messages.error(request, str(e))
         return HttpResponseRedirect('/')
     video_path = settings.MEDIA_ROOT + "videos/" + \
         str(tr_rec.tutorial_detail.foss_id) + "/" + str(tr_rec.tutorial_detail_id) + "/" + tr_rec.video
     video_info = get_video_info(video_path)
+
+
+    # logs_tutorialprogresslogs.find_one_and_update(
+    #     { "username" : str(request.user.username) }, 
+    #     { "$set" : { visit_count_field: visit_count } },
+    #     upsert=True
+    # )
+
+
     context = {
         'tr_rec': tr_rec,
         'tr_recs': tr_recs,
         'questions': questions,
         'video_info': video_info,
+        'start_time': start_time,
+        'visit_count': str (visit_count),
         'media_url': settings.MEDIA_URL,
         'media_path': settings.MEDIA_ROOT,
         'tutorial_path': str(tr_rec.tutorial_detail.foss_id) + '/' + str(tr_rec.tutorial_detail_id) + '/',

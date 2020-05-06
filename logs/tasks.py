@@ -55,6 +55,8 @@ def dump_json_logs(self, data):
             with open("logs/mongo_errors_log.txt", "a") as f:
                 f.write(str(e) + "\n")
 
+        # self.retry(countdown=2, exc=e, max_retries=2) 
+
     except Exception as exc:  # catching a generic exception
 
         # sending the task back into the queue with exponential
@@ -71,16 +73,27 @@ logs_tutorialprogresslogs = db.logs_tutorialprogresslogs
 def update_tutorial_progress(self, data):
 
     field = 'fosses.' + data['foss'] + '.' + data['tutorial']
-    time_field = field + '.curr_time' 
+
+    curr_time_field = field + '.curr_time'
+    time_field = field + '.visit' + str (data['visit_count']) + '.minute-' + str(data['curr_time'])
     completed_field = field + '.completed'
+    visit_count_field = field + '.visit_count'
+    foss_language_field = 'fosses.' + data['foss'] + '.foss_lang'
 
     try:
         # mark as complete if current timestamp >= 80% of total length of tutorial
+        # TODO: reduce redundancy
         if data['curr_time'] >= 0.8 * data['total_time']:
 
             logs_tutorialprogresslogs.find_one_and_update(
                 { "username" : data['username'] }, 
-                { "$set" : { time_field : data["curr_time"], completed_field: True } },
+                { "$set" : { foss_language_field: data['foss_lang'], curr_time_field: data['curr_time'], visit_count_field: data['visit_count'], completed_field: True } },
+                upsert=True
+            )
+
+            logs_tutorialprogresslogs.find_one_and_update(
+                { "username" : data['username'] },
+                { "$push" : { time_field : data["datetime"] } },
                 upsert=True
             )
 
@@ -88,14 +101,20 @@ def update_tutorial_progress(self, data):
 
         # if curr_time is not yet 80% of total, OR
         # if it was marked as complete earlier, 
-        # only update the curr_time
+
+        logs_tutorialprogresslogs.find_one_and_update(
+            { "username" : data['username'] }, 
+            { "$set" : { foss_language_field: data['foss_lang'], curr_time_field: data['curr_time'], visit_count_field: data['visit_count'] } },
+            upsert=True
+        )
             
         logs_tutorialprogresslogs.find_one_and_update(
             { "username" : data['username'] }, 
-            { "$set" : { time_field : data["curr_time"] } },
+            { "$push" : { time_field : data["datetime"] } },
             upsert=True
         )
         
+        
     except Exception as e:
         with open("logs/tutorial_errors_log.txt", "a") as f:
-                f.write(str(e) + "\n")
+            f.write(str(e) + "\n")

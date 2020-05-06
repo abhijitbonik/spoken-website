@@ -652,6 +652,8 @@
            }
                         //for videojs trigger
             var trackedPlayer = videojs('st_video');
+            console.log ({{ start_time }});
+            trackedPlayer.currentTime({{ start_time }}); 
             var previousTime = 0;
             var currentTime = 0;
 
@@ -687,7 +689,7 @@
             // });
 
             var user_is_authenticated = {{ user.is_authenticated|yesno:"true,false" }};
-            var previous_log_save_time = 0;
+            var previous_log_save_time = -1;
 
             trackedPlayer.on('timeupdate', function() {
 
@@ -705,18 +707,20 @@
                 });
                 
                 
-                // storing tutorial video progress
-                if (Math.abs(currentTime - previous_log_save_time) >= 5 && user_is_authenticated === true) {
+                // storing tutorial video progress when the minute changes
+                if (Math.abs(parseInt(currentTime / 60) - previous_log_save_time) >= 1 && user_is_authenticated === true) {
                     
-                    previous_log_save_time = currentTime
+                    previous_log_save_time = parseInt(currentTime / 60)
 
                     tutorial_progress_data = {
-                        
                         username: "{{ user }}",
                         foss: "{{ tr_rec.tutorial_detail.foss.foss }}",
-                        tutorial: "{{ tr_rec.tutorial_detail.tutorial }} - {{ tr_rec.language.name }}",
-                        curr_time: currentTime,
-                        total_time: trackedPlayer.duration(),
+                        tutorial: "{{ tr_rec.tutorial_detail.tutorial }}",
+                        foss_lang: "{{ tr_rec.language.name }}",
+                        curr_time: parseInt(currentTime / 60),
+                        total_time: parseInt (trackedPlayer.duration() / 60),
+                        timestamp: new Date().getTime(),
+                        visit_count: "{{ visit_count }}",
                     }
                     
                     
