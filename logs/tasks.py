@@ -77,17 +77,14 @@ def update_tutorial_progress(self, data):
     curr_time_field = field + '.curr_time'
     time_field = field + '.visit' + str (data['visit_count']) + '.minute-' + str(data['curr_time'])
     completed_field = field + '.completed'
-    visit_count_field = field + '.visit_count'
-    foss_language_field = 'fosses.' + data['foss'] + '.foss_lang'
 
     try:
         # mark as complete if current timestamp >= 80% of total length of tutorial
-        # TODO: reduce redundancy
         if data['curr_time'] >= 0.8 * data['total_time']:
 
             logs_tutorialprogresslogs.find_one_and_update(
                 { "username" : data['username'] }, 
-                { "$set" : { foss_language_field: data['foss_lang'], curr_time_field: data['curr_time'], visit_count_field: data['visit_count'], completed_field: True } },
+                { "$set" : { curr_time_field: data['curr_time'], completed_field: True } },
                 upsert=True
             )
 
@@ -104,7 +101,7 @@ def update_tutorial_progress(self, data):
 
         logs_tutorialprogresslogs.find_one_and_update(
             { "username" : data['username'] }, 
-            { "$set" : { foss_language_field: data['foss_lang'], curr_time_field: data['curr_time'], visit_count_field: data['visit_count'] } },
+            { "$set" : { curr_time_field: data['curr_time'] } },
             upsert=True
         )
             

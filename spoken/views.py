@@ -306,7 +306,7 @@ def watch_tutorial(request, foss, tutorial, lang):
                 user = logs_tutorialprogresslogs.find_one({ "username": str(request.user.username) })
                 
                 foss_name = str(tr_rec.tutorial_detail.foss.foss)
-                tutorial_name = str(tr_rec.tutorial_detail.tutorial) + ' - ' + str(tr_rec.language.name)
+                tutorial_name = str(tr_rec.tutorial_detail.tutorial)
                 
                 # number of times visited previously
                 visit_count = user['fosses'][foss_name][tutorial_name]['visit_count']
@@ -318,6 +318,16 @@ def watch_tutorial(request, foss, tutorial, lang):
                                 # leave the start time as 0 and visit count as 1 in this case
             pass
 
+        visit_count_field = 'fosses.' + foss_name + '.' + tutorial_name + '.visit_count'
+        foss_language_field = 'fosses.' + foss_name + '.foss_lang'
+        visit_number_field = 'fosses.' + foss_name + '.' + tutorial_name + '.visit' + str (visit_count)
+
+        logs_tutorialprogresslogs.find_one_and_update(
+            { "username" : str(request.user.username) }, 
+            { "$set" : { visit_count_field: visit_count, foss_language_field: tr_rec.language.name, visit_number_field: {} } },
+            upsert=True
+        )
+
     except Exception as e:
         messages.error(request, str(e))
         return HttpResponseRedirect('/')
@@ -325,12 +335,6 @@ def watch_tutorial(request, foss, tutorial, lang):
         str(tr_rec.tutorial_detail.foss_id) + "/" + str(tr_rec.tutorial_detail_id) + "/" + tr_rec.video
     video_info = get_video_info(video_path)
 
-
-    # logs_tutorialprogresslogs.find_one_and_update(
-    #     { "username" : str(request.user.username) }, 
-    #     { "$set" : { visit_count_field: visit_count } },
-    #     upsert=True
-    # )
 
 
     context = {
