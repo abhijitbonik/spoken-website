@@ -1,7 +1,25 @@
 from .urls_to_events import EVENT_NAME_DICT
 import re
 from .tasks import dump_json_logs
+import asyncio
 import datetime
+import requests
+import json
+import re
+from .utils import dump_json_logs
+
+
+def getLoop():
+
+    loop = None
+    
+    try:
+        loop = asyncio.get_event_loop()
+    except RuntimeError:
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+    
+    return loop
 
 class Logs:
 
@@ -24,7 +42,7 @@ class Logs:
                     data['visited_by'] = request.user.username if request.user.is_authenticated else 'anonymous'
                     data['ip_address'] = request.META['REMOTE_ADDR']
                     data['method'] = request.method
-                    data['datetime'] = datetime.datetime.now()
+                    # data['datetime'] = datetime.datetime.now()
 
                     if 'has_visited' in request.session:
                         data['unique_visit'] = False
@@ -34,9 +52,8 @@ class Logs:
                     
                     request.session.set_expiry(15552000)  # 6 months, in seconds
 
-                    # queueing the task in Celery by first sending it
-                    # to a message broker (redis)
-                    dump_json_logs.delay(data)  
+                    loop = getLoop()
+                    loop.run_in_executor(None, dump_json_logs, data)
 
                     break
         
