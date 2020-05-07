@@ -320,11 +320,12 @@ def watch_tutorial(request, foss, tutorial, lang):
 
         visit_count_field = 'fosses.' + foss_name + '.' + tutorial_name + '.visit_count'
         foss_language_field = 'fosses.' + foss_name + '.foss_lang'
-        visit_number_field = 'fosses.' + foss_name + '.' + tutorial_name + '.visit' + str (visit_count)
-
+        visits_field = 'fosses.' + foss_name + '.' + tutorial_name + '.visits'
+        visit_number_field = visits_field + '.' + str (visit_count)
+        
         logs_tutorialprogresslogs.find_one_and_update(
             { "username" : str(request.user.username) }, 
-            { "$set" : { visit_count_field: visit_count, foss_language_field: tr_rec.language.name, visit_number_field: {} } },
+            { "$set" : { visit_number_field: {}, visit_count_field: visit_count, foss_language_field: tr_rec.language.name } },
             upsert=True
         )
 

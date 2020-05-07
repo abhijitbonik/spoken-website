@@ -116,6 +116,17 @@ do the IP geolocation only once and store it in the session
 - Flower for monitoring
 - Update tutorial logs to contain visit number, timestamp, language, etc.
 
+# 07/05
+
+- Performing load testing -
+**Async function with Djongo**, **Celery with Djongo**, **Async function with pymongo**, **Celery with pymongo**  
+- Testing method: Queue with 10000 tasks for each of the 4 setups.  
+
+Results -  
+- **Async function with Pymongo** - performed the fastest. Took about 4 seconds on my machine.  
+- **Celery with Pymongo** - took about 16 seconds on my machine  
+- **Async function with Djongo** - performed the slowest, took about 38 seconds on my machine  
+- **Celery with Djongo** - took about 30 seconds on my machine
 
 
 
