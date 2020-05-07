@@ -2,22 +2,21 @@
 from __future__ import absolute_import, unicode_literals
 
 from celery import shared_task
-from django.contrib.gis.geoip2 import GeoIP2
-from geoip2.errors import AddressNotFoundError
 from logs.models import WebsiteLogs
 from pymongo import MongoClient
 import re
 
-# initializing the GeoIP2 client
-g = GeoIP2()
+
+# create and configure the pymongo client
+client = MongoClient()
+db = client.log_storage
+log_collection = db.log_collection
 
 # using bind=True on the shared_task decorator to turn the below function
 # into a method of Task class. This lets us use self.retry for retrying
 # failed tasks
 @shared_task(bind=True)
 def dump_json_logs(self, data):
-
-    global g
 
     try:
 
@@ -27,11 +26,11 @@ def dump_json_logs(self, data):
             return
 
         try:
-            location = g.city(data["ip_address"])
+            location = { "country": "a" }
             data["country"] = location["country_name"]
             data["city"] = location["city"]
             data['state_code'] = location["region"]
-        except AddressNotFoundError:
+        except:
             data["country"] = "Unknown"
             data["city"] = "Unknown"
             data['state_code'] = "Unknown"
@@ -48,9 +47,9 @@ def dump_json_logs(self, data):
 
         # store in MongoDB
         try:
-            WebsiteLogs.objects.using('logs').create(path_info=data['path_info'], browser_info=data['browser_info'], method=data['method'], event_name=data['event_name'],
-                                                     visited_by=data['visited_by'], ip_address=data['ip_address'], country=data['country'], state_code=data['state_code'],
-                                                     city=data['city'], unique_visit=data['unique_visit'], datetime=data['datetime'])
+           log_id = log_collection.insert_one(data).inserted_id
+           print (log_id)
+           
         except Exception as e:
             with open("logs/mongo_errors_log.txt", "a") as f:
                 f.write(str(e) + "\n")
@@ -64,9 +63,7 @@ def dump_json_logs(self, data):
         # an error is display in the celery worker.
         self.retry(exc=exc, countdown=2 ** self.request.retries)
 
-# create and configure the pymongo client
-client = MongoClient()
-db = client.logs
+
 logs_tutorialprogresslogs = db.logs_tutorialprogresslogs
 
 @shared_task(bind=True)
@@ -75,7 +72,7 @@ def update_tutorial_progress(self, data):
     field = 'fosses.' + data['foss'] + '.' + data['tutorial']
 
     curr_time_field = field + '.curr_time'
-    time_field = field + '.visit' + str (data['visit_count']) + '.minute-' + str(data['curr_time'])
+    time_field = field + '.visits.' + str (data['visit_count']) + '.minute-' + str(data['curr_time'])
     completed_field = field + '.completed'
 
     try:
