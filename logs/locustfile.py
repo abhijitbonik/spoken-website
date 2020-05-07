@@ -7,7 +7,7 @@ def profile(l):
     l.client.get("/watch/BASH/Introduction+to+BASH+Shell+Scripting/English/")
 
 class UserBehavior(TaskSet):
-    tasks = {index: 1}
+    tasks = {index: 2, profile: 5}
 
 
 class WebsiteUser(HttpLocust):
