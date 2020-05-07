@@ -15,47 +15,57 @@ g = GeoIP2()
 # into a method of Task class. This lets us use self.retry for retrying
 # failed tasks
 @shared_task(bind=True)
-def dump_json_logs(self, data):
+def dump_json_logs(self, task_queue):
 
     global g
 
-    try:
-
-        # if the IP address is not a properly formatted IPv4, reject it
-        # otherwise it can crash the Celery worker due to GeoIP throwing an error
-        if not re.match(r'^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$', data["ip_address"]):
-            return
+    for i in range(len(task_queue)):
 
         try:
-            location = g.city(data["ip_address"])
-            data["country"] = location["country_name"]
-            data["city"] = location["city"]
-            data['state_code'] = location["region"]
-        except AddressNotFoundError:
-            data["country"] = "Unknown"
-            data["city"] = "Unknown"
-            data['state_code'] = "Unknown"
 
-        # sometimes the Geolocation may not return some of the fields
-        if not data["country"]:
-            data["country"] = "Unknown"
+            # if the IP address is not a properly formatted IPv4, reject it
+            # otherwise it can crash the Celery worker due to GeoIP throwing an error
+            if not re.match(r'^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$', task_queue[i]["ip_address"]):
+                return
 
-        if not data["state_code"]:
-            data["state_code"] = "Unknown"
+            try:
+                location = g.city(task_queue[i]["ip_address"])
+                task_queue[i]["country"] = location["country_name"]
+                task_queue[i]["city"] = location["city"]
+                task_queue[i]['state_code'] = location["region"]
+            except AddressNotFoundError:
+                task_queue[i]["country"] = "Unknown"
+                task_queue[i]["city"] = "Unknown"
+                task_queue[i]['state_code'] = "Unknown"
 
-        if not data["city"]:
-            data["city"] = "Unknown"
+            # sometimes the Geolocation may not return some of the fields
+            if not task_queue[i]["country"]:
+                task_queue[i]["country"] = "Unknown"
 
-        # store in MongoDB
-        try:
-            WebsiteLogs.objects.using('logs').create(path_info=data['path_info'], browser_info=data['browser_info'], method=data['method'], event_name=data['event_name'],
-                                                     visited_by=data['visited_by'], ip_address=data['ip_address'], country=data['country'], state_code=data['state_code'],
-                                                     city=data['city'], unique_visit=data['unique_visit'], datetime=data['datetime'])
+            if not task_queue[i]["state_code"]:
+                task_queue[i]["state_code"] = "Unknown"
+
+            if not task_queue[i]["city"]:
+                task_queue[i]["city"] = "Unknown"
+
         except Exception as e:
-            with open("logs/mongo_errors_log.txt", "a") as f:
+            with open("logs/errors_log.txt", "a") as f:
                 f.write(str(e) + "\n")
 
-        # self.retry(countdown=2, exc=e, max_retries=2) 
+    # store in MongoDB
+    try:
+
+        objs = [
+            WebsiteLogs (path_info=data['path_info'], browser_info=data['browser_info'], method=data['method'], event_name=data['event_name'],
+                         visited_by=data['visited_by'], ip_address=data['ip_address'], country=data['country'], state_code=data['state_code'],
+                         city=data['city'], unique_visit=data['unique_visit'], datetime=data['datetime']
+                )
+                for data in task_queue
+        ]
+        
+        WebsiteLogs.objects.using('logs').bulk_create(objs)
+
+    # self.retry(countdown=2, exc=e, max_retries=2) 
 
     except Exception as exc:  # catching a generic exception
 

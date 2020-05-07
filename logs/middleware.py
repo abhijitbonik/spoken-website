@@ -3,6 +3,8 @@ import re
 from .tasks import dump_json_logs
 import datetime
 
+task_queue = []
+
 class Logs:
 
     def __init__(self, get_response):
@@ -13,6 +15,7 @@ class Logs:
         return self.get_response(request)
 
     def process_view(self, request, view_func, view_args, view_kwargs):
+        global task_queue
 
         try:
             for key in EVENT_NAME_DICT.keys():
@@ -34,9 +37,17 @@ class Logs:
                     
                     request.session.set_expiry(15552000)  # 6 months, in seconds
 
+                    task_queue.append(data)
+
+                    # print ('\n\n\n' + str(len(task_queue)) + '\n\n\n')
+                    
+                    if len(task_queue) >= 20:
+                        dump_json_logs.delay(task_queue)  
+                        task_queue = []
+
                     # queueing the task in Celery by first sending it
                     # to a message broker (redis)
-                    dump_json_logs.delay(data)  
+                    # dump_json_logs.delay(data)  
 
                     break
         
