@@ -135,6 +135,13 @@ def keyword_search(request):
 
 @csrf_exempt
 def tutorial_search(request):
+
+    # create and configure the pymongo client
+    from pymongo import MongoClient
+    client = MongoClient()
+    db = client.logs
+    logs_tutorialprogresslogs = db.logs_tutorialprogresslogs
+
     context = {}
     collection = None
     form = TutorialSearchForm()
@@ -148,7 +155,29 @@ def tutorial_search(request):
             foss_get = request.GET.get('search_foss', '')
             language_get = request.GET.get('search_language', '')
             if foss_get and language_get:
+
                 collection = queryset.filter(tutorial_detail__foss__foss=foss_get, language__name=language_get).order_by('tutorial_detail__level', 'tutorial_detail__order')
+                tutorial_count_in_given_lang = collection.count()
+                completed_tutorial_count = 0
+
+                log = logs_tutorialprogresslogs.find_one({ "username" : str(request.user.username) })
+
+                if log:
+                    try:
+                        foss_log = log['fosses'][foss_get]
+                        if foss_log['foss_lang'] == language_get:  # assuming only 1 language attempted
+                            
+                            for tutorial, details in foss_log.items():
+                                
+                                if tutorial == "foss_lang":
+                                    continue
+                                if details["completed"]:
+                                    completed_tutorial_count += 1
+
+                    except Exception as e:
+                        with open("tutorial_search_errors.txt", "a") as f:
+                            f.write (str(e))
+
 
             elif foss_get:
                 collection = queryset.filter(tutorial_detail__foss__foss=foss_get).order_by('tutorial_detail__level', 'tutorial_detail__order', 'language__name')
@@ -167,6 +196,9 @@ def tutorial_search(request):
     context['collection'] = collection
     context['SCRIPT_URL'] = settings.SCRIPT_URL
     context['current_foss'] = foss_get
+
+    if foss_get and language_get:
+        context['completion_percentage'] = int ( (completed_tutorial_count / tutorial_count_in_given_lang) * 100)
     return render(request, 'spoken/templates/tutorial_search.html', context)
 
 def list_videos(request):
