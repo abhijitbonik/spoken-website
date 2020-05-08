@@ -9,21 +9,19 @@ import datetime
 # using bind=True on the shared_task decorator to turn the below function
 # into a method of Task class. This lets us use self.retry for retrying
 # failed tasks
+
+# create and configure the pymongo client
+client = MongoClient()
+db = client.log_storage
+logs_websitelogs2 = db.logs_websitelogs2
+
 @shared_task(bind=True)
 def dump_json_logs(self, logs):
 
     # store in MongoDB
     try:
 
-        objs = [
-            WebsiteLogs (path_info=data['path_info'], browser_info=data['browser_info'], method=data['method'], event_name=data['event_name'],
-                         visited_by=data['visited_by'], ip_address=data['ip_address'], country=data['country'], state_code=data['state_code'],
-                         city=data['city'], unique_visit=data['unique_visit'], datetime=datetime.datetime.strptime(data['datetime'], '%Y-%m-%d %H:%M:%S.%f')
-                )
-                for data in logs
-        ]
-        
-        WebsiteLogs.objects.using('logs').bulk_create(objs)
+        logs_websitelogs2.insert_many([logs[i] for i in range(1000)])
 
     # self.retry(countdown=2, exc=e, max_retries=2) 
 
