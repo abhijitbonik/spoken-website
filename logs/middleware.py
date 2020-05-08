@@ -1,9 +1,21 @@
 from .urls_to_events import EVENT_NAME_DICT
 import re
-from .tasks import dump_json_logs
+from .utils import enqueue_log
 import datetime
+import asyncio
 
-task_queue = []
+def getLoop():
+
+    loop = None
+    
+    try:
+        loop = asyncio.get_event_loop()
+    except RuntimeError:
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+    
+    return loop
+
 
 class Logs:
 
@@ -15,8 +27,6 @@ class Logs:
         return self.get_response(request)
 
     def process_view(self, request, view_func, view_args, view_kwargs):
-        global task_queue
-
         try:
             for key in EVENT_NAME_DICT.keys():
                 if re.match(key, request.META['PATH_INFO']):
@@ -27,7 +37,7 @@ class Logs:
                     data['visited_by'] = request.user.username if request.user.is_authenticated else 'anonymous'
                     data['ip_address'] = request.META['REMOTE_ADDR']
                     data['method'] = request.method
-                    data['datetime'] = datetime.datetime.now()
+                    data['datetime'] = str(datetime.datetime.now())
 
                     if 'has_visited' in request.session:
                         data['unique_visit'] = False
@@ -37,17 +47,8 @@ class Logs:
                     
                     request.session.set_expiry(15552000)  # 6 months, in seconds
 
-                    task_queue.append(data)
-
-                    # print ('\n\n\n' + str(len(task_queue)) + '\n\n\n')
-                    
-                    if len(task_queue) >= 20:
-                        dump_json_logs.delay(task_queue)  
-                        task_queue = []
-
-                    # queueing the task in Celery by first sending it
-                    # to a message broker (redis)
-                    # dump_json_logs.delay(data)  
+                    loop = getLoop()
+                    loop.run_in_executor(None, enqueue_log, data)
 
                     break
         
