@@ -28,22 +28,26 @@ conf = {
         # 'AUTH_MECHANISM': 'SCRAM-SHA-1'
         }
     },
-    # 'CELERY_BROKER_URL': 'redis://localhost:6379/2',
-    # 'CELERY_RESULT_BACKEND': 'redis://localhost:6379/3',
-    # 'CELERY_ACCEPT_CONTENT': ['application/json'],
-    # 'CELERY_RESULT_SERIALIZER': 'json',
-    # 'CELERY_TASK_SERIALIZER': 'json'
+    'BROKER_URL': 'redis://localhost:6379/0',
+    'RESULT_BACKEND': 'redis://localhost:6379/1',
+    'ACCEPT_CONTENT': ['application/json'],
+    'RESULT_SERIALIZER': 'json',
+    'TASK_SERIALIZER': 'json',
+    'CELERY_BROKER_URL': 'redis://localhost:6379/0',
+    'CELERY_RESULT_BACKEND': 'redis://localhost:6379/1',
+    'CELERY_ACCEPT_CONTENT': ['application/json'],
+    'CELERY_RESULT_SERIALIZER': 'json',
+    'CELERY_TASK_SERIALIZER': 'json'
 }
 
 settings.configure(**conf)
 apps.populate(settings.INSTALLED_APPS)
 
-from logs.models import WebsiteLogs
-
 # configurations for redis
 r = redis.Redis(
     host='localhost',
-    port=6379
+    port=6379,
+    db=3
 )
 
 # create and configure the pymongo client
@@ -51,6 +55,15 @@ r = redis.Redis(
 # db = client.log_storage
 # logs_websitelogs = db.logs_websitelogs
 
+from celery import Celery
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'spoken.settings')
+app = Celery('spoken')
+
+app.config_from_object('django.conf:settings', namespace='CELERY')
+app.autodiscover_tasks()
+
+from logs.models import WebsiteLogs
+from logs.tasks import dump_json_logs
 
 while (True):
 
@@ -71,16 +84,8 @@ while (True):
             
             t0 = time.clock()
 
-            # logs_websitelogs.insert_many([logs[i] for i in range(1000)])
-            objs = [
-            WebsiteLogs (path_info=data['path_info'], browser_info=data['browser_info'], method=data['method'], event_name=data['event_name'],
-                         visited_by=data['visited_by'], ip_address=data['ip_address'], country=data['country'], state_code=data['state_code'],
-                         city=data['city'], unique_visit=data['unique_visit'], datetime=datetime.datetime.strptime(data['datetime'], '%Y-%m-%d %H:%M:%S.%f')
-                )
-                for data in logs
-            ]
-        
-            WebsiteLogs.objects.using('default').bulk_create(objs)
+            dump_json_logs.delay(logs)
+
             t1 = time.clock() - t0
 
             print("Time elapsed: ", t1) # CPU seconds elapsed (floating point)

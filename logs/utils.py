@@ -12,7 +12,8 @@ from geoip2.errors import AddressNotFoundError
 # configurations for redis
 redis_client = redis.Redis(
     host = 'localhost',
-    port = 6379
+    port = 6379,
+    db = 3
 )
 
 # initializing the GeoIP2 client
