@@ -118,15 +118,27 @@ do the IP geolocation only once and store it in the session
 
 # 07/05
 
-- Performing load testing -
+- Performing load testing for single log insert into DB per task -
 **Async function with Djongo**, **Celery with Djongo**, **Async function with pymongo**, **Celery with pymongo**  
-- Testing method: Queue with 10000 tasks for each of the 4 setups.  
+- Testing method: Queue with 10000 tasks for each of the 4 setups. Testing environment - my local machine.  
 
 Results -  
-- **Async function with Pymongo** - performed the fastest. Took about 4 seconds on my machine.  
-- **Celery with Pymongo** - took about 16 seconds on my machine  
-- **Async function with Djongo** - performed the slowest, took about 38 seconds on my machine  
-- **Celery with Djongo** - took about 30 seconds on my machine
+- **Async function with Pymongo** - performed the fastest. Took about 4 seconds
+- **Celery with Pymongo** - took about 16 seconds
+- **Async function with Djongo** - performed the slowest, took about 38 seconds
+- **Celery with Djongo** - took about 30 seconds
+
+# 08/05
+
+ Performing load testing for bulk insert (1000 logs) into DB per tasks -
+**Async function with Djongo**, **Celery with Djongo**, **Async function with pymongo**, **Celery with pymongo**  
+- Testing method: Bulk insert of 1000 logs at a time for each of the 4 setups. Testing environment - my local machine.   
+  
+Results -  
+- **Async function with Pymongo** - performed the fastest. Took about 0.01 seconds.  
+- **Celery with Pymongo** - took about 0.04 seconds.
+- **Async function with Djongo** - performed the slowest. took about 9 seconds 
+- **Celery with Djongo** - took about 4 seconds. 
 
 
 
