@@ -4,3 +4,9 @@
 from .celery import app as celery_app
 
 __all__ = ('celery_app',)
+
+
+# Create and configure the pymongo client
+from pymongo import MongoClient
+
+MONGO_CLIENT = MongoClient()

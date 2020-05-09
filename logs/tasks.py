@@ -6,15 +6,16 @@ from logs.models import WebsiteLogs
 from pymongo import MongoClient
 import datetime
 
+# mongo client
+from spoken import MONGO_CLIENT
+
+# configurations for pymongo
+db = MONGO_CLIENT.log_storage
+logs_websitelogs2 = db.logs_websitelogs2
+
 # using bind=True on the shared_task decorator to turn the below function
 # into a method of Task class. This lets us use self.retry for retrying
 # failed tasks
-
-# create and configure the pymongo client
-client = MongoClient()
-db = client.log_storage
-logs_websitelogs2 = db.logs_websitelogs2
-
 @shared_task(bind=True)
 def dump_json_logs(self, logs):
 

@@ -256,7 +256,14 @@
 {% load creationdata %}
 {% block title %}{{ tr_rec.tutorial_detail.tutorial }} - {{ tr_rec.language.name }}{% endblock %}
 {% block search %}{% endblock %}
-{% block heading %}{{ tr_rec.tutorial_detail.tutorial }} - {{ tr_rec.language.name }}{% endblock %}
+{% block heading %}{{ tr_rec.tutorial_detail.tutorial }} - {{ tr_rec.language.name }}
+    {% if completed %}
+        <b><h4 class="page-title" id="completed" style="color: green;">Completed</h4></b>
+    {% else %}
+        <b><h4 class="page-title" id="completed" style="color: orange;">Not Completed</h4></b>
+    {% endif %}
+
+{% endblock %}
 {% block content %}
     {% if tr_rec.video_status %}
     <row>
@@ -362,6 +369,8 @@
     {% endif %}
     <row>
         <div class="inner-content-body col-lg-8 col-md-8 col-sm-8 no-padding">
+            <button id="mark_as_complete" style="display: block;">Mark as Complete</button>
+            <button id="mark_as_incomplete" style="display: block;">Mark as Incomplete</button>
             <div class="inner-shadow">
                 <div class="row video-share">
                     <div class="ysubscribe pull-left col-lg-9 col-md-9 col-sm-9">
@@ -509,6 +518,53 @@
 {% block compressinlinejsblock %}
     <script type="text/javascript">
         $(document).ready(function(){
+
+            $("#mark_as_complete").click(function(e) {
+                e.preventDefault();
+                $.ajax({
+                    type: "POST",
+                    url: "/logs/change_completion/",
+                    data: {
+                        username: "{{ user }}",
+                        completed: true,
+                        foss: "{{ tr_rec.tutorial_detail.foss.foss }}",
+                        tutorial: "{{ tr_rec.tutorial_detail.tutorial }}",
+                    },
+                    success: function(result) {
+                        $('#completed').html('Completed')
+                        $('#completed').css({
+                            'color': 'green',
+                        });
+                    },
+                    error: function(result) {
+                        alert(result);
+                    }
+                });
+            });
+
+            $("#mark_as_incomplete").click(function(e) {
+                e.preventDefault();
+                $.ajax({
+                    type: "POST",
+                    url: "/logs/change_completion/",
+                    data: { 
+                        username: "{{ user }}",
+                        completed: false,
+                        foss: "{{ tr_rec.tutorial_detail.foss.foss }}",
+                        tutorial: "{{ tr_rec.tutorial_detail.tutorial }}",
+                    },
+                    success: function(result) {
+
+                        $('#completed').html('Not Completed')
+                        $('#completed').css({
+                            'color': 'orange',
+                        });
+                    },
+                    error: function(result) {
+                        alert(result);
+                    }
+                });
+            });
 
             currentVideo = $('.playlist-item.active');
             nextVideo = currentVideo.next('li');
@@ -691,6 +747,34 @@
             var user_is_authenticated = {{ user.is_authenticated|yesno:"true,false" }};
             var previous_log_save_time = -1;
 
+            setInterval(check_completed, 5000);
+
+            function check_completed ()
+            {
+                if ($('#completed').text() != "Completed")
+                {
+                    $.ajax({
+                        type: "POST",
+                        url: "/logs/check_completion/",
+                        data: {
+                            username: "{{ user }}",
+                            foss: "{{ tr_rec.tutorial_detail.foss.foss }}",
+                            tutorial: "{{ tr_rec.tutorial_detail.tutorial }}",
+                        },
+                        success: function(response) { 
+                            $('#completed').html('Completed')
+                            $('#completed').css({
+                                'color': 'green',
+                                'display': 'block',
+                            });
+                        },
+                        error: function(xhr, status, err) {
+                            // do nothing
+                        }
+                    });
+                }
+            }
+
             trackedPlayer.on('timeupdate', function() {
 
                 // logic for updating tutorial timestamp
@@ -726,7 +810,7 @@
                     
                     $.ajax({
                             type: "POST",
-                            url: "http://localhost:8000/logs/save_tutorial_progress/",
+                            url: "/logs/save_tutorial_progress/",
                             data: tutorial_progress_data,
                             // beforeSend: function(xhr, settings) {
                             //     if (!csrfSafeMethod(settings.type) && !this.crossDomain) {

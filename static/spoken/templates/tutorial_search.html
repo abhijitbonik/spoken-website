@@ -3,6 +3,7 @@
 {% load static %}
 {% load cmsdata %}
 {% load creationdata %}
+{% load tutorialprogress %}
 {% block title %}Search Tutorials{% endblock %}
 {% block compressinlinecssblock %}
     <style>
@@ -102,11 +103,23 @@
                 <div style="clear: both;"></div>
                 <hr>
             {% endif %}
-            <div style="clear: both;"></div>
 
-            <div>
-                <h1>{{ completion_percentage }} percentage complete.</h1>
+            <div style="clear: both;"></div>
+            
+            <div class="panel panel-default">
+
+                <div class="panel-body">
+                    <h4 style="text-align: center; margin-top: -4px;">Your course progress</h4>
+                    <div class="progress">
+                        <div class="progress-bar progress-bar-success progress-bar-striped active" role="progressbar"
+                        aria-valuenow="{{ completion_percentage }}" aria-valuemin="0" aria-valuemax="100" style="color: black; width:{{ completion_percentage }}%;">
+                        {{ completion_percentage }}% complete
+                        </div>
+                    </div>
+
+                </div>
             </div>
+
             {% for record in collection %}
                 <div class='result-record row'>
                     <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2 thumb">
@@ -117,6 +130,12 @@
                         <div class='desc'>
                                 <p><b>Foss : </b><i>{{ record.tutorial_detail.foss }} - {{ record.language }}</i></p>
                                 <p><b>Outline: </b>{{ record.outline|len_cutter:180 }}</p>
+
+                                {% if completed_tutorial_dict|get_item:record.tutorial_detail.tutorial %}
+                                    <p style="color: green;"><b>Completed: </b>Yes</p>
+                                {% else %}
+                                    <p style="color: orange;"><b>Completed: </b>No</p>
+                                {% endif %}
                             </dl>
                         </div>
                     </div>

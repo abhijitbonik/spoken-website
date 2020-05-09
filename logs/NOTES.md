@@ -140,5 +140,19 @@ Results -
 - **Async function with Djongo** - performed the slowest. took about 9 seconds 
 - **Celery with Djongo** - took about 4 seconds. 
 
+# 09/05
+
+- FOSS progress display
+- Tutorial completion/non-completion status manipulation
+
+Bugs to fix - wrong behaviour on changing the language of the FOSS  
+            - if the user clicks mark as incomplete, don't let it be automatically be marked as complete in the same visit.  
+            - fix behaviour for non logged in users  
+            
+TODO - continue where the user left off  
+     - add completion/non-completion status in the playlist section, on the tutorial page.  
+     - since 'spoken' is not an app, we cannot have dedicated templatetags for it. Currently only 1 template tag is
+       in use, and is defined in events/templatetags/tutorialprogress.py . Check if it's possible to move it somewhere else.  
+
 
 

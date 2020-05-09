@@ -31,6 +31,9 @@ from .filters import NewsStateFilter, MediaTestimonialsFossFilter
 from .forms import *
 from .search import search_for_results
 
+# mongo client
+from spoken import MONGO_CLIENT
+
 
 def is_resource_person(user):
     """Check if the user is having resource person  rights"""
@@ -136,10 +139,8 @@ def keyword_search(request):
 @csrf_exempt
 def tutorial_search(request):
 
-    # create and configure the pymongo client
-    from pymongo import MongoClient
-    client = MongoClient()
-    db = client.logs
+    # mongo settings
+    db = MONGO_CLIENT.logs
     logs_tutorialprogresslogs = db.logs_tutorialprogresslogs
 
     context = {}
@@ -149,6 +150,11 @@ def tutorial_search(request):
     show_on_homepage = 1
     queryset = TutorialResource.objects.filter(Q(status=1) | Q(status=2), tutorial_detail__foss__show_on_homepage = show_on_homepage)
 
+    # for course completion calculations
+    completed_tutorial_dict = {}
+    
+    total_tutorials = 0
+
     if request.method == 'GET' and request.GET:
         form = TutorialSearchForm(request.GET)
         if form.is_valid():
@@ -157,8 +163,7 @@ def tutorial_search(request):
             if foss_get and language_get:
 
                 collection = queryset.filter(tutorial_detail__foss__foss=foss_get, language__name=language_get).order_by('tutorial_detail__level', 'tutorial_detail__order')
-                tutorial_count_in_given_lang = collection.count()
-                completed_tutorial_count = 0
+                total_tutorials = collection.count()
 
                 log = logs_tutorialprogresslogs.find_one({ "username" : str(request.user.username) })
 
@@ -167,17 +172,19 @@ def tutorial_search(request):
                         foss_log = log['fosses'][foss_get]
                         if foss_log['foss_lang'] == language_get:  # assuming only 1 language attempted
                             
-                            for tutorial, details in foss_log.items():
+                            for key, details in foss_log.items():
                                 
-                                if tutorial == "foss_lang":
+                                if key == "foss_lang":
                                     continue
+
+                                # otherwise the key corresponds to a tutorial within the given FOSS.
                                 if details["completed"]:
-                                    completed_tutorial_count += 1
+                                    completed_tutorial_dict[key] = True
 
-                    except Exception as e:
-                        with open("tutorial_search_errors.txt", "a") as f:
-                            f.write (str(e))
+                    except:
+                        print ('User has not attempted the given FOSS in the given language')
 
+                context['completion_percentage'] = int ( (len(completed_tutorial_dict) / total_tutorials) * 100)
 
             elif foss_get:
                 collection = queryset.filter(tutorial_detail__foss__foss=foss_get).order_by('tutorial_detail__level', 'tutorial_detail__order', 'language__name')
@@ -196,9 +203,8 @@ def tutorial_search(request):
     context['collection'] = collection
     context['SCRIPT_URL'] = settings.SCRIPT_URL
     context['current_foss'] = foss_get
-
-    if foss_get and language_get:
-        context['completion_percentage'] = int ( (completed_tutorial_count / tutorial_count_in_given_lang) * 100)
+    context['completed_tutorial_dict'] = completed_tutorial_dict
+        
     return render(request, 'spoken/templates/tutorial_search.html', context)
 
 def list_videos(request):
@@ -325,18 +331,17 @@ def watch_tutorial(request, foss, tutorial, lang):
         
         start_time = 0
         visit_count = 1
-
+        completed = False
+        
         try:
             if request.user.is_authenticated:
 
-                # create and configure the pymongo client.
-                # TODO: move this Mongo initialization code somewhere else.
-                from pymongo import MongoClient
-                client = MongoClient()
-                db = client.logs
+                # mongo settings
+                db = MONGO_CLIENT.logs
                 logs_tutorialprogresslogs = db.logs_tutorialprogresslogs
+
                 user = logs_tutorialprogresslogs.find_one({ "username": str(request.user.username) })
-                
+
                 foss_name = str(tr_rec.tutorial_detail.foss.foss)
                 tutorial_name = str(tr_rec.tutorial_detail.tutorial)
                 
@@ -345,6 +350,9 @@ def watch_tutorial(request, foss, tutorial, lang):
                 visit_count += 1
 
                 start_time = user['fosses'][foss_name][tutorial_name]['curr_time'] * 60
+
+                if user['fosses'][foss_name][tutorial_name]['completed']:
+                    completed = True
 
         except Exception as e:  # the user, if authenticated, has not viewed that tutorial previously.
                                 # leave the start time as 0 and visit count as 1 in this case
@@ -377,6 +385,7 @@ def watch_tutorial(request, foss, tutorial, lang):
         'video_info': video_info,
         'start_time': start_time,
         'visit_count': str (visit_count),
+        'completed': completed,
         'media_url': settings.MEDIA_URL,
         'media_path': settings.MEDIA_ROOT,
         'tutorial_path': str(tr_rec.tutorial_detail.foss_id) + '/' + str(tr_rec.tutorial_detail_id) + '/',
