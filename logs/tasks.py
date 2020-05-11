@@ -22,9 +22,11 @@ def dump_json_logs(self, logs):
     # store in MongoDB
     try:
 
+        # convert datetime from str to datetime object
+        for i in range (len(logs)):
+            logs[i]['datetime'] = datetime.datetime.strptime(logs[i]['datetime'], '%Y-%m-%d %H:%M:%S.%f')
+        
         website_logs.insert_many([logs[i] for i in range(len(logs))])
-
-    # self.retry(countdown=2, exc=e, max_retries=2) 
 
     except Exception as exc:  # catching a generic exception
 
@@ -63,8 +65,7 @@ def update_tutorial_progress(self, data):
 
             return
 
-        # if curr_time is not yet 80% of total, OR
-        # if it was marked as complete earlier, 
+        # if curr_time is not yet 80% of total
 
         tutorial_progress_logs.find_one_and_update(
             { "username" : data['username'] }, 

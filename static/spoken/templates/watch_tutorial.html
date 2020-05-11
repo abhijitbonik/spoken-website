@@ -2,6 +2,7 @@
 {% load widget_tweaks %}
 {% load static %}
 {% load creationdata %}
+{% load tutorialprogress %}
 {% block main_meta %}
     <meta name="title" content="{{ tr_rec.tutorial_detail.tutorial }} - {{ tr_rec.language.name }}">
     <meta name="description" content="{{ tr_rec.tutorial_detail.foss.description }}">
@@ -345,6 +346,17 @@
                 <div class='description'>
                     {{rec.tutorial_detail.tutorial}}
                 </div>
+
+                <div id="playlist_completion">
+
+                    {% if completed_tutorial_dict|get_item:rec.tutorial_detail.tutorial %}
+                        <p style="color: green;"><b>Completed: </b>Yes</p>
+                    {% else %}
+                        <p style="color: orange;"><b>Completed: </b>No</p>
+                    {% endif %}
+
+                </div>
+                
                 </a>
             </li>
             {% endfor %}
@@ -519,6 +531,7 @@
     <script type="text/javascript">
         $(document).ready(function(){
 
+            // functionality of the Mark as Complete button
             $("#mark_as_complete").click(function(e) {
                 e.preventDefault();
                 $.ajax({
@@ -541,7 +554,8 @@
                     }
                 });
             });
-
+            
+            // functionality of the Mark as Incomplete button
             $("#mark_as_incomplete").click(function(e) {
                 e.preventDefault();
                 $.ajax({

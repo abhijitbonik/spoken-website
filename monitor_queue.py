@@ -76,7 +76,7 @@ while (True):
 
             for i in range(len(logs)):
                 r.lpop('tasks')
-                print (i)
+
                 # Extract json data into dict
                 my_json = logs[i].decode('utf8')
                 logs[i] = json.loads(my_json)

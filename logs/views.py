@@ -58,13 +58,11 @@ def change_completion (request):
 
         # TODO: don't allow dots in the FOSS names and tutorial names
         completed_field = 'fosses.' + request.POST.get('foss') + '.' + request.POST.get('tutorial') + '.completed'
-        res = tutorial_progress_logs.find_one_and_update(
+        tutorial_progress_logs.find_one_and_update(
                 { "username" : request.POST.get('username') }, 
                 { "$set" : { completed_field: completed } },
                 upsert=True
         )
-
-        print (res)
 
         return HttpResponse(status=200)
 
@@ -90,7 +88,7 @@ def check_completion (request):
             { "username" : request.POST.get('username') }
         )
 
-        if res['fosses'][request.POST.get('foss')][request.POST.get('tutorial')]['completed']:
+        if res['fosses'][request.POST.get('foss')][request.POST.get('tutorial')]['completed'] == True:
             return HttpResponse(status=200)
 
         return HttpResponse(status=500)

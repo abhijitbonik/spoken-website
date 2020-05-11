@@ -332,6 +332,7 @@ def watch_tutorial(request, foss, tutorial, lang):
         start_time = 0
         visit_count = 1
         completed = False
+        completed_tutorial_dict = {}
         
         try:
             if request.user.is_authenticated:
@@ -345,19 +346,35 @@ def watch_tutorial(request, foss, tutorial, lang):
                 foss_name = str(tr_rec.tutorial_detail.foss.foss)
                 tutorial_name = str(tr_rec.tutorial_detail.tutorial)
                 
+                for tut_name, tutorial_details in user['fosses'][foss_name].items():
+
+                    if tut_name == "foss_lang":
+                        continue
+
+                    # print ('\n\n\n\n' + str(tutorial_name) + '  ---  ' + str(tutorial_details) + '\n\n\n\n')
+
+                    try:
+                        if tutorial_details['completed']:
+                            completed_tutorial_dict[tut_name] = True
+                    except:
+                        continue
+
                 # number of times visited previously
                 visit_count = user['fosses'][foss_name][tutorial_name]['visit_count']
                 visit_count += 1
-
+        
                 start_time = user['fosses'][foss_name][tutorial_name]['curr_time'] * 60
 
                 if user['fosses'][foss_name][tutorial_name]['completed']:
                     completed = True
 
+
+
         except Exception as e:  # the user, if authenticated, has not viewed that tutorial previously.
                                 # leave the start time as 0 and visit count as 1 in this case
             pass
 
+        
         visit_count_field = 'fosses.' + foss_name + '.' + tutorial_name + '.visit_count'
         foss_language_field = 'fosses.' + foss_name + '.foss_lang'
         visits_field = 'fosses.' + foss_name + '.' + tutorial_name + '.visits'
@@ -386,6 +403,7 @@ def watch_tutorial(request, foss, tutorial, lang):
         'start_time': start_time,
         'visit_count': str (visit_count),
         'completed': completed,
+        'completed_tutorial_dict': completed_tutorial_dict,
         'media_url': settings.MEDIA_URL,
         'media_path': settings.MEDIA_ROOT,
         'tutorial_path': str(tr_rec.tutorial_detail.foss_id) + '/' + str(tr_rec.tutorial_detail_id) + '/',
