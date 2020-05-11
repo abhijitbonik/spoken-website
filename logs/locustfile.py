@@ -1,3 +1,5 @@
+# for load testing with LocustIO
+
 from locust import HttpLocust, TaskSet, between
 
 def index(l):

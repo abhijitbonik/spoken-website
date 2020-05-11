@@ -1,13 +1,19 @@
+# MongoDB validation schema for the website logs
+
+The below is the MongoDB [validation schema](https://docs.mongodb.com/manual/core/schema-validation/) for the website event logs collection. This is to be entered in the mongo shell, after selecting the appropriate database. 
+
+```
 db.createCollection( "website_logs" , { 
    validator: { $jsonSchema: { 
+
       bsonType: "object", 
 
-      required: [ "path_info", "browser_info", "method", "event_name", "visited_by", "ip_address", "country", "state_code", "city", "datetime" ], 
+      required: [ "path_info", "browser_info", "method", "event_name", "visited_by","ip_address",      "country", "state_code", "city", "datetime", "first_time_visit" ], 
       properties: { 
          path_info: { 
             bsonType: "string", 
-            pattern: "^(/(.)*)+$",
-            description: "Webpage path. Required and must be a string" }, 
+            pattern: "^/(.)*",
+            description: "Webpage path. Required and must be a string beginning with /" }, 
          browser_info: { 
             bsonType: "string", 
             description: "Browser info. Required and must be a string" }, 
@@ -37,15 +43,11 @@ db.createCollection( "website_logs" , {
          datetime: {
             bsonType: "date",
             description: "Datetime of log. Required." },
-         request_data: {
-            bsonType: "object",
-            description: "Additional request parameters. Optional." },
-         view_args: {
-             bsonType: "array",
-             description: "Additional arguments passed to the view. Optional." },
-         view_kwargs: {
-             bsonType: "object",
-             description: "Additional keyword arguments passed to the view. Optional." }
+         first_time_visit: {
+            bsonType: "bool",
+            description: "Whether the visit was first time or returning. Required." },
+         }
       }
    }
-}})
+})
+```

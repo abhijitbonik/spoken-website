@@ -13,15 +13,13 @@ from geoip2.errors import AddressNotFoundError
 redis_client = redis.Redis(
     host = 'localhost',
     port = 6379,
-    db = 3
+    db = 0
 )
 
 # initializing the GeoIP2 client
 g = GeoIP2()
 
 def enqueue_log(data):
-
-    global g
 
     try:
 
@@ -51,7 +49,7 @@ def enqueue_log(data):
             data["city"] = "Unknown"
 
         # enqueue job in the redis queue named 'tasks2'
-        redis_client.rpush('tasks2', json.dumps(data))
+        redis_client.rpush('tasks', json.dumps(data))
 
     except Exception as e:
         with open ("enqueue_logs_errors.txt", "a") as f:

@@ -141,7 +141,7 @@ def tutorial_search(request):
 
     # mongo settings
     db = MONGO_CLIENT.logs
-    logs_tutorialprogresslogs = db.logs_tutorialprogresslogs
+    tutorial_progress_logs = db.tutorial_progress_logs
 
     context = {}
     collection = None
@@ -165,7 +165,7 @@ def tutorial_search(request):
                 collection = queryset.filter(tutorial_detail__foss__foss=foss_get, language__name=language_get).order_by('tutorial_detail__level', 'tutorial_detail__order')
                 total_tutorials = collection.count()
 
-                log = logs_tutorialprogresslogs.find_one({ "username" : str(request.user.username) })
+                log = tutorial_progress_logs.find_one({ "username" : str(request.user.username) })
 
                 if log:
                     try:
@@ -338,9 +338,9 @@ def watch_tutorial(request, foss, tutorial, lang):
 
                 # mongo settings
                 db = MONGO_CLIENT.logs
-                logs_tutorialprogresslogs = db.logs_tutorialprogresslogs
+                tutorial_progress_logs = db.tutorial_progress_logs
 
-                user = logs_tutorialprogresslogs.find_one({ "username": str(request.user.username) })
+                user = tutorial_progress_logs.find_one({ "username": str(request.user.username) })
 
                 foss_name = str(tr_rec.tutorial_detail.foss.foss)
                 tutorial_name = str(tr_rec.tutorial_detail.tutorial)
@@ -363,7 +363,7 @@ def watch_tutorial(request, foss, tutorial, lang):
         visits_field = 'fosses.' + foss_name + '.' + tutorial_name + '.visits'
         visit_number_field = visits_field + '.' + str (visit_count)
         
-        logs_tutorialprogresslogs.find_one_and_update(
+        tutorial_progress_logs.find_one_and_update(
             { "username" : str(request.user.username) }, 
             { "$set" : { visit_number_field: {}, visit_count_field: visit_count, foss_language_field: tr_rec.language.name } },
             upsert=True

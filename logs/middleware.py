@@ -40,9 +40,9 @@ class Logs:
                     data['datetime'] = str(datetime.datetime.now())
 
                     if 'has_visited' in request.session:
-                        data['unique_visit'] = False
+                        data['first_time_visit'] = False
                     else:
-                        data['unique_visit'] = True
+                        data['first_time_visit'] = True
                         request.session['has_visited'] = True
                     
                     request.session.set_expiry(15552000)  # 6 months, in seconds
@@ -53,6 +53,6 @@ class Logs:
                     break
         
         except Exception as e:
-            print("Log Exception " + e)
+            print("Log Exception " + str(e))
         
         return None

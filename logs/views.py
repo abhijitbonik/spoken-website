@@ -47,7 +47,7 @@ def change_completion (request):
 
     # configurations for pymongo
     db = MONGO_CLIENT.logs
-    logs_tutorialprogresslogs = db.logs_tutorialprogresslogs
+    tutorial_progress_logs = db.tutorial_progress_logs
 
     # store in MongoDB
     try:
@@ -58,7 +58,7 @@ def change_completion (request):
 
         # TODO: don't allow dots in the FOSS names and tutorial names
         completed_field = 'fosses.' + request.POST.get('foss') + '.' + request.POST.get('tutorial') + '.completed'
-        res = logs_tutorialprogresslogs.find_one_and_update(
+        res = tutorial_progress_logs.find_one_and_update(
                 { "username" : request.POST.get('username') }, 
                 { "$set" : { completed_field: completed } },
                 upsert=True
@@ -82,11 +82,11 @@ def check_completion (request):
 
     # configurations for pymongo
     db = MONGO_CLIENT.logs
-    logs_tutorialprogresslogs = db.logs_tutorialprogresslogs
+    tutorial_progress_logs = db.tutorial_progress_logs
 
     try:
 
-        res = logs_tutorialprogresslogs.find_one(
+        res = tutorial_progress_logs.find_one(
             { "username" : request.POST.get('username') }
         )
 

@@ -47,7 +47,7 @@ apps.populate(settings.INSTALLED_APPS)
 r = redis.Redis(
     host='localhost',
     port=6379,
-    db=3
+    db=0
 )
 
 # create and configure the pymongo client
@@ -67,15 +67,15 @@ from logs.tasks import dump_json_logs
 
 while (True):
 
-    if r.llen('tasks2') >= 1000:
+    if r.llen('tasks') >= 1000:
 
         try:
 
-            logs = r.lrange('tasks2', 0, 999)
-            # r.ltrim('tasks2', start=1000)
+            logs = r.lrange('tasks', 0, 999)
+            # r.ltrim('tasks', start=1000)
 
             for i in range(len(logs)):
-                r.lpop('tasks2')
+                r.lpop('tasks')
                 print (i)
                 # Extract json data into dict
                 my_json = logs[i].decode('utf8')
