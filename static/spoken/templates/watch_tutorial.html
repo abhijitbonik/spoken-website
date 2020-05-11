@@ -349,10 +349,22 @@
 
                 <div id="playlist_completion">
 
-                    {% if completed_tutorial_dict|get_item:rec.tutorial_detail.tutorial %}
-                        <p style="color: green;"><b>Completed: </b>Yes</p>
+                    {% if rec.tutorial_detail.tutorial == tr_rec.tutorial_detail.tutorial %}
+            
+                        {% if completed_tutorial_dict|get_item:rec.tutorial_detail.tutorial %}
+                            <p id="playlist_curr_tutorial" style="color: green;"><b>Completed: </b>Yes</p>
+                        {% else %}
+                            <p id="playlist_curr_tutorial" style="color: orange;"><b>Completed: </b>No</p>
+                        {% endif %}
+                    
                     {% else %}
-                        <p style="color: orange;"><b>Completed: </b>No</p>
+                        
+                        {% if completed_tutorial_dict|get_item:rec.tutorial_detail.tutorial %}
+                            <p style="color: green;"><b>Completed: </b>Yes</p>
+                        {% else %}
+                            <p style="color: orange;"><b>Completed: </b>No</p>
+                        {% endif %}
+
                     {% endif %}
 
                 </div>
@@ -548,6 +560,12 @@
                         $('#completed').css({
                             'color': 'green',
                         });
+
+                        $('#playlist_curr_tutorial').html('Completed: Yes')
+                        $('#playlist_curr_tutorial').css({
+                            'color': 'green',
+                        });
+
                     },
                     error: function(result) {
                         alert(result);
@@ -573,6 +591,12 @@
                         $('#completed').css({
                             'color': 'orange',
                         });
+
+                        $('#playlist_curr_tutorial').html('Completed: No')
+                        $('#playlist_curr_tutorial').css({
+                            'color': 'orange',
+                        });
+
                     },
                     error: function(result) {
                         alert(result);
@@ -761,34 +785,6 @@
             var user_is_authenticated = {{ user.is_authenticated|yesno:"true,false" }};
             var previous_log_save_time = -1;
 
-            setInterval(check_completed, 5000);
-
-            function check_completed ()
-            {
-                if ($('#completed').text() != "Completed")
-                {
-                    $.ajax({
-                        type: "POST",
-                        url: "/logs/check_completion/",
-                        data: {
-                            username: "{{ user }}",
-                            foss: "{{ tr_rec.tutorial_detail.foss.foss }}",
-                            tutorial: "{{ tr_rec.tutorial_detail.tutorial }}",
-                        },
-                        success: function(response) { 
-                            $('#completed').html('Completed')
-                            $('#completed').css({
-                                'color': 'green',
-                                'display': 'block',
-                            });
-                        },
-                        error: function(xhr, status, err) {
-                            // do nothing
-                        }
-                    });
-                }
-            }
-
             trackedPlayer.on('timeupdate', function() {
 
                 // logic for updating tutorial timestamp
@@ -831,8 +827,39 @@
                             //         xhr.setRequestHeader("X-CSRFToken", csrftoken);
                             //     }
                             // },
-                            success: function(response) { 
+                            success: function(response) {
+
+                                // the tutorial progress log was successfully saved. 
                                 console.log("Success");
+                                
+                                // check if tutorial is marked as completed
+                                if ($('#completed').text() != "Completed")
+                                {
+                                    $.ajax({
+                                        type: "POST",
+                                        url: "/logs/check_completion/",
+                                        data: {
+                                            username: "{{ user }}",
+                                            foss: "{{ tr_rec.tutorial_detail.foss.foss }}",
+                                            tutorial: "{{ tr_rec.tutorial_detail.tutorial }}",
+                                        },
+                                        success: function(response) { 
+                                            $('#completed').html('Completed')
+                                            $('#completed').css({
+                                                'color': 'green',
+                                                'display': 'block',
+                                            });
+
+                                            $('#playlist_curr_tutorial').html('Completed: Yes');
+                                            $('#playlist_curr_tutorial').css({
+                                                'color': 'green',
+                                            });
+                                        },
+                                        error: function(xhr, status, err) {
+                                            // do nothing
+                                        }
+                                    });
+                                }
                             },
                             error: function(xhr, status, err) {
                                 console.log(xhr.responseText);
