@@ -242,6 +242,11 @@
             color: #4F8811;
         }
 
+        .completion-control {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
     .ScrollStyle
     {
         max-height: 370px;
@@ -393,8 +398,10 @@
     {% endif %}
     <row>
         <div class="inner-content-body col-lg-8 col-md-8 col-sm-8 no-padding">
-            <button id="mark_as_complete" style="display: block;">Mark as Complete</button>
-            <button id="mark_as_incomplete" style="display: block;">Mark as Incomplete</button>
+            <div class="completion-control">
+                <button type="button" class="btn btn-success" id="mark_as_complete">Mark Tutorial as Complete</button>
+                <button type="button" class="btn btn-warning" id="mark_as_incomplete">Mark Tutorial as Incomplete</button>
+            </div>
             <div class="inner-shadow">
                 <div class="row video-share">
                     <div class="ysubscribe pull-left col-lg-9 col-md-9 col-sm-9">
