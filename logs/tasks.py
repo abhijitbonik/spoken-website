@@ -41,10 +41,10 @@ tutorial_progress_logs = db.tutorial_progress_logs
 @shared_task(bind=True)
 def update_tutorial_progress(self, data):
 
-    field = 'fosses.' + data['foss'] + '.' + data['tutorial']
+    field = 'fosses.' + data['foss_id'] + '.' + data['language_id'] + '.' + data['tutorial_id']
 
     curr_time_field = field + '.curr_time'
-    time_field = field + '.visits.' + str (data['visit_count']) + '.minute-' + str(data['curr_time'])
+    time_field = field + '.visits.' + str (data['language_visit_count']) + '.minute-' + str(data['curr_time'])
     completed_field = field + '.completed'
 
     try:

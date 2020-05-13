@@ -349,9 +349,9 @@
 
                 <div id="playlist_completion">
 
-                    {% if rec.tutorial_detail.tutorial == tr_rec.tutorial_detail.tutorial %}
+                    {% if rec.tutorial_detail.id == tr_rec.tutorial_detail.id %}
             
-                        {% if completed_tutorial_dict|get_item:rec.tutorial_detail.tutorial %}
+                        {% if completed_tutorial_dict|get_item:rec.tutorial_detail.id %}
                             <p id="playlist_curr_tutorial" style="color: green;"><b>Completed: </b>Yes</p>
                         {% else %}
                             <p id="playlist_curr_tutorial" style="color: orange;"><b>Completed: </b>No</p>
@@ -359,7 +359,7 @@
                     
                     {% else %}
                         
-                        {% if completed_tutorial_dict|get_item:rec.tutorial_detail.tutorial %}
+                        {% if completed_tutorial_dict|get_item:rec.tutorial_detail.id %}
                             <p style="color: green;"><b>Completed: </b>Yes</p>
                         {% else %}
                             <p style="color: orange;"><b>Completed: </b>No</p>
@@ -553,7 +553,11 @@
                         username: "{{ user }}",
                         completed: true,
                         foss: "{{ tr_rec.tutorial_detail.foss.foss }}",
+                        foss_lang: "{{ tr_rec.language.name }}",
                         tutorial: "{{ tr_rec.tutorial_detail.tutorial }}",
+                        foss_id: "{{ tr_rec.tutorial_detail.foss.id }}",
+                        tutorial_id: "{{ td_rec.id }}",
+                        language_id: "{{ tr_rec.language.id }}",
                     },
                     success: function(result) {
                         $('#completed').html('Completed')
@@ -583,7 +587,11 @@
                         username: "{{ user }}",
                         completed: false,
                         foss: "{{ tr_rec.tutorial_detail.foss.foss }}",
+                        foss_lang: "{{ tr_rec.language.name }}",
                         tutorial: "{{ tr_rec.tutorial_detail.tutorial }}",
+                        foss_id: "{{ tr_rec.tutorial_detail.foss.id }}",
+                        tutorial_id: "{{ td_rec.id }}",
+                        language_id: "{{ tr_rec.language.id }}",
                     },
                     success: function(result) {
 
@@ -811,10 +819,13 @@
                         foss: "{{ tr_rec.tutorial_detail.foss.foss }}",
                         tutorial: "{{ tr_rec.tutorial_detail.tutorial }}",
                         foss_lang: "{{ tr_rec.language.name }}",
+                        foss_id: "{{ tr_rec.tutorial_detail.foss.id }}",
+                        tutorial_id: "{{ td_rec.id }}",
+                        language_id: "{{ tr_rec.language.id }}",
                         curr_time: parseInt(currentTime / 60),
                         total_time: parseInt (trackedPlayer.duration() / 60),
                         timestamp: new Date().getTime(),
-                        visit_count: "{{ visit_count }}",
+                        language_visit_count: "{{ language_visit_count }}",
                     }
                     
                     
@@ -841,7 +852,11 @@
                                         data: {
                                             username: "{{ user }}",
                                             foss: "{{ tr_rec.tutorial_detail.foss.foss }}",
+                                            foss_lang: "{{ tr_rec.language.name }}",
                                             tutorial: "{{ tr_rec.tutorial_detail.tutorial }}",
+                                            foss_id: "{{ tr_rec.tutorial_detail.foss.id }}",
+                                            tutorial_id: "{{ td_rec.id }}",
+                                            language_id: "{{ tr_rec.language.id }}",
                                         },
                                         success: function(response) { 
                                             $('#completed').html('Completed')

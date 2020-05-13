@@ -169,15 +169,11 @@ def tutorial_search(request):
 
                 if log:
                     try:
-                        foss_log = log['fosses'][foss_get]
-                        if foss_log['foss_lang'] == language_get:  # assuming only 1 language attempted
+                        foss_log = log['fosses'][collection[0].language.id]
+                        if foss_log[collection[0].language.id] is not None:
                             
-                            for key, details in foss_log.items():
-                                
-                                if key == "foss_lang":
-                                    continue
+                            for key, details in foss_log[collection[0].language.id].items():
 
-                                # otherwise the key corresponds to a tutorial within the given FOSS.
                                 if details["completed"]:
                                     completed_tutorial_dict[key] = True
 
@@ -330,7 +326,7 @@ def watch_tutorial(request, foss, tutorial, lang):
             ' ', '-'), tutorial=td_rec.tutorial.replace(' ', '-')).order_by('-date_created')
         
         start_time = 0
-        visit_count = 1
+        language_visit_count = 1
         completed = False
         completed_tutorial_dict = {}
         
@@ -345,27 +341,27 @@ def watch_tutorial(request, foss, tutorial, lang):
 
                 foss_name = str(tr_rec.tutorial_detail.foss.foss)
                 tutorial_name = str(tr_rec.tutorial_detail.tutorial)
-                
-                for tut_name, tutorial_details in user['fosses'][foss_name].items():
+                foss_lang = tr_rec.language.name
 
-                    if tut_name == "foss_lang":
-                        continue
+                tutorial_id = td_rec.id
+                foss_id = td_rec.foss.id
+                language_id = tr_rec.language.id
 
-                    # print ('\n\n\n\n' + str(tutorial_name) + '  ---  ' + str(tutorial_details) + '\n\n\n\n')
+                for tut_id, tutorial_details in user['fosses'][foss_id][language_id].items():
 
                     try:
                         if tutorial_details['completed']:
-                            completed_tutorial_dict[tut_name] = True
+                            completed_tutorial_dict[tut_id] = True
                     except:
                         continue
 
                 # number of times visited previously
-                visit_count = user['fosses'][foss_name][tutorial_name]['visit_count']
-                visit_count += 1
+                language_visit_count = user['fosses'][foss_id][language_id][tutorial_id]['visit_count']
+                language_visit_count += 1
         
-                start_time = user['fosses'][foss_name][tutorial_name]['curr_time'] * 60
+                start_time = user['fosses'][foss_id][language_id][tutorial_id]['curr_time'] * 60
 
-                if user['fosses'][foss_name][tutorial_name]['completed']:
+                if user['fosses'][foss_id][language_id][tutorial_id]['completed']:
                     completed = True
 
 
@@ -375,14 +371,13 @@ def watch_tutorial(request, foss, tutorial, lang):
             pass
 
         
-        visit_count_field = 'fosses.' + foss_name + '.' + tutorial_name + '.visit_count'
-        foss_language_field = 'fosses.' + foss_name + '.foss_lang'
-        visits_field = 'fosses.' + foss_name + '.' + tutorial_name + '.visits'
-        visit_number_field = visits_field + '.' + str (visit_count)
+        language_visit_count_field = 'fosses.' + foss_id + '.' + language_id + '.' + tutorial_id + '.visit_count'
+        visits_field = 'fosses.' + foss_id + '.' + language_id + '.' + tutorial_id + '.visits'
+        visit_number_field = visits_field + '.' + str (language_visit_count)
         
         tutorial_progress_logs.find_one_and_update(
             { "username" : str(request.user.username) }, 
-            { "$set" : { visit_number_field: {}, visit_count_field: visit_count, foss_language_field: tr_rec.language.name } },
+            { "$set" : { visit_number_field: {}, language_visit_count_field: language_visit_count } },
             upsert=True
         )
 
@@ -401,7 +396,7 @@ def watch_tutorial(request, foss, tutorial, lang):
         'questions': questions,
         'video_info': video_info,
         'start_time': start_time,
-        'visit_count': str (visit_count),
+        'language_visit_count': str (language_visit_count),
         'completed': completed,
         'completed_tutorial_dict': completed_tutorial_dict,
         'media_url': settings.MEDIA_URL,

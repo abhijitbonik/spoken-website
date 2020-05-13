@@ -106,23 +106,22 @@
 
             <div style="clear: both;"></div>
             
-            <div class="panel panel-default">
 
-                <div class="panel-body">
-                    <h4 style="text-align: center; margin-top: -4px;">Your course progress</h4>
-                    <div class="progress">
-                        <div class="progress-bar progress-bar-success progress-bar-striped active" role="progressbar"
-                        aria-valuenow="{{ completion_percentage }}" aria-valuemin="0" aria-valuemax="100" style="color: black; width:{{ completion_percentage }}%;">
-                        {{ completion_percentage }}% complete
-                        </div>
+            <div class="well well-sm">
+                <h4 style="text-align: center; padding-bottom: 5px;">Your course progress for <b>{{ collection.0.tutorial_detail.foss }}</b> in <b>{{ collection.0.language }}</b></h4>
+                <div class="progress">
+                    <div class="progress-bar progress-bar-success progress-bar-striped active" role="progressbar"
+                    aria-valuenow="{{ completion_percentage }}" aria-valuemin="0" aria-valuemax="100" style="color: black; width:{{ completion_percentage }}%;">
+                    <b>{{ completion_percentage }}% complete</b>
                     </div>
-
                 </div>
+                <h4 style="text-align: center; padding-bottom: 5px;">Click <a>here</a> to continue where you left off.</h4>
             </div>
+
 
             {% for record in collection %}
                 <div class='result-record row'>
-                    <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2 thumb">
+                    <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2 thumb" style="margin-top: 11px;">
                         <a href="/watch/{{ record.tutorial_detail.foss.foss|get_url_name }}/{{ record.tutorial_detail.tutorial|get_url_name }}/{{ record.language }}" class='thumb'><img width="100%" src="{{ record.tutorial_detail|get_thumb_path:'Small' }}"></a>
                     </div>
                     <div class="info col-lg-8 col-md-8 col-sm-8 col-xs-8">
@@ -131,7 +130,7 @@
                                 <p><b>Foss : </b><i>{{ record.tutorial_detail.foss }} - {{ record.language }}</i></p>
                                 <p><b>Outline: </b>{{ record.outline|len_cutter:180 }}</p>
 
-                                {% if completed_tutorial_dict|get_item:record.tutorial_detail.tutorial %}
+                                {% if completed_tutorial_dict|get_item:record.tutorial_detail.id %}
                                     <p style="color: green;"><b>Completed: </b>Yes</p>
                                 {% else %}
                                     <p style="color: orange;"><b>Completed: </b>No</p>
