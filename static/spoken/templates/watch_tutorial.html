@@ -556,7 +556,7 @@
                         foss_lang: "{{ tr_rec.language.name }}",
                         tutorial: "{{ tr_rec.tutorial_detail.tutorial }}",
                         foss_id: "{{ tr_rec.tutorial_detail.foss.id }}",
-                        tutorial_id: "{{ td_rec.id }}",
+                        tutorial_id: "{{ tutorial_id }}",
                         language_id: "{{ tr_rec.language.id }}",
                     },
                     success: function(result) {
@@ -590,7 +590,7 @@
                         foss_lang: "{{ tr_rec.language.name }}",
                         tutorial: "{{ tr_rec.tutorial_detail.tutorial }}",
                         foss_id: "{{ tr_rec.tutorial_detail.foss.id }}",
-                        tutorial_id: "{{ td_rec.id }}",
+                        tutorial_id: "{{ tutorial_id }}",
                         language_id: "{{ tr_rec.language.id }}",
                     },
                     success: function(result) {
@@ -820,7 +820,7 @@
                         tutorial: "{{ tr_rec.tutorial_detail.tutorial }}",
                         foss_lang: "{{ tr_rec.language.name }}",
                         foss_id: "{{ tr_rec.tutorial_detail.foss.id }}",
-                        tutorial_id: "{{ td_rec.id }}",
+                        tutorial_id: "{{ tutorial_id }}",
                         language_id: "{{ tr_rec.language.id }}",
                         curr_time: parseInt(currentTime / 60),
                         total_time: parseInt (trackedPlayer.duration() / 60),
@@ -855,7 +855,7 @@
                                             foss_lang: "{{ tr_rec.language.name }}",
                                             tutorial: "{{ tr_rec.tutorial_detail.tutorial }}",
                                             foss_id: "{{ tr_rec.tutorial_detail.foss.id }}",
-                                            tutorial_id: "{{ td_rec.id }}",
+                                            tutorial_id: "{{ tutorial_id }}",
                                             language_id: "{{ tr_rec.language.id }}",
                                         },
                                         success: function(response) { 

@@ -166,16 +166,18 @@ def tutorial_search(request):
                 total_tutorials = collection.count()
 
                 log = tutorial_progress_logs.find_one({ "username" : str(request.user.username) })
-
+                
+                # todo: check if collection empty
                 if log:
                     try:
-                        foss_log = log['fosses'][collection[0].language.id]
-                        if foss_log[collection[0].language.id] is not None:
+                        foss_log = log['fosses'][str(collection[0].tutorial_detail.foss.id)]
+                        print (foss_log)
+                        if foss_log[str(collection[0].language.id)] is not None:
                             
-                            for key, details in foss_log[collection[0].language.id].items():
+                            for key, details in foss_log[str(collection[0].language.id)].items():
 
                                 if details["completed"]:
-                                    completed_tutorial_dict[key] = True
+                                    completed_tutorial_dict[str(key)] = True
 
                     except:
                         print ('User has not attempted the given FOSS in the given language')
@@ -199,6 +201,8 @@ def tutorial_search(request):
     context['collection'] = collection
     context['SCRIPT_URL'] = settings.SCRIPT_URL
     context['current_foss'] = foss_get
+
+    print (str (completed_tutorial_dict))
     context['completed_tutorial_dict'] = completed_tutorial_dict
         
     return render(request, 'spoken/templates/tutorial_search.html', context)
@@ -343,9 +347,9 @@ def watch_tutorial(request, foss, tutorial, lang):
                 tutorial_name = str(tr_rec.tutorial_detail.tutorial)
                 foss_lang = tr_rec.language.name
 
-                tutorial_id = td_rec.id
-                foss_id = td_rec.foss.id
-                language_id = tr_rec.language.id
+                tutorial_id = str(td_rec.id)
+                foss_id = str(td_rec.foss.id)
+                language_id = str(tr_rec.language.id)
 
                 for tut_id, tutorial_details in user['fosses'][foss_id][language_id].items():
 
@@ -371,8 +375,8 @@ def watch_tutorial(request, foss, tutorial, lang):
             pass
 
         
-        language_visit_count_field = 'fosses.' + foss_id + '.' + language_id + '.' + tutorial_id + '.visit_count'
-        visits_field = 'fosses.' + foss_id + '.' + language_id + '.' + tutorial_id + '.visits'
+        language_visit_count_field = 'fosses.' + str(foss_id) + '.' + str(language_id) + '.' + str(tutorial_id) + '.visit_count'
+        visits_field = 'fosses.' + str(foss_id) + '.' + str(language_id) + '.' + str(tutorial_id) + '.visits'
         visit_number_field = visits_field + '.' + str (language_visit_count)
         
         tutorial_progress_logs.find_one_and_update(
@@ -398,6 +402,7 @@ def watch_tutorial(request, foss, tutorial, lang):
         'start_time': start_time,
         'language_visit_count': str (language_visit_count),
         'completed': completed,
+        'tutorial_id': td_rec.id,
         'completed_tutorial_dict': completed_tutorial_dict,
         'media_url': settings.MEDIA_URL,
         'media_path': settings.MEDIA_ROOT,
