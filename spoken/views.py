@@ -170,18 +170,20 @@ def tutorial_search(request):
                 # todo: check if collection empty
                 if log:
                     try:
+
                         foss_log = log['fosses'][str(collection[0].tutorial_detail.foss.id)]
-                        
-                        context['last_watched_tut_url'] = foss_log['last_watched_tut_url']
+
                         if foss_log[str(collection[0].language.id)] is not None:
+
+                            context['last_watched_tut_url'] = foss_log[str(collection[0].language.id)]['last_watched_tut_url']
                             
                             for key, details in foss_log[str(collection[0].language.id)].items():
-
-                                if details["completed"]:
+                                
+                                if key != 'last_watched_tut_url' and details["completed"]:
                                     completed_tutorial_dict[str(key)] = True
                     
-                    except:
-                        print ('User has not attempted the given FOSS in the given language')
+                    except Exception as e:
+                        print ('\n\n' + str (e) + '\n\n')
 
                 context['completion_percentage'] = int ( (len(completed_tutorial_dict) / total_tutorials) * 100)
 
@@ -346,7 +348,6 @@ def watch_tutorial(request, foss, tutorial, lang):
 
                 user = tutorial_progress_logs.find_one({ "username": str(request.user.username) })
 
-                last_watched_tut_url =  '/watch/' + foss2 + '/' + tutorial2 + '/' + lang
                 foss_name = str(tr_rec.tutorial_detail.foss.foss)
                 tutorial_name = str(tr_rec.tutorial_detail.tutorial)
                 foss_lang = tr_rec.language.name
@@ -355,6 +356,26 @@ def watch_tutorial(request, foss, tutorial, lang):
                 foss_id = str(td_rec.foss.id)
                 language_id = str(tr_rec.language.id)
 
+                language_visit_count_field = 'fosses.' + str(foss_id) + '.' + str(language_id) + '.' + str(tutorial_id) + '.visit_count'
+                visits_field = 'fosses.' + str(foss_id) + '.' + str(language_id) + '.' + str(tutorial_id) + '.visits'
+                visit_number_field = visits_field + '.' + str (language_visit_count)
+                last_watched_tut_url_field = 'fosses.' + str(foss_id) + '.' + str(language_id) + '.last_watched_tut_url'
+                
+                last_watched_tut_url =  '/watch/' + foss2 + '/' + tutorial2 + '/' + lang
+
+                try:
+                    # number of times visited previously
+                    language_visit_count = user['fosses'][foss_id][language_id][tutorial_id]['visit_count']
+                    language_visit_count += 1
+                except:
+                    language_visit_count = 1
+
+                tutorial_progress_logs.find_one_and_update(
+                    { "username" : str(request.user.username) }, 
+                    { "$set" : { visit_number_field: {}, language_visit_count_field: language_visit_count, last_watched_tut_url_field: last_watched_tut_url } },
+                    upsert=True
+                )
+
                 for tut_id, tutorial_details in user['fosses'][foss_id][language_id].items():
 
                     try:
@@ -362,10 +383,6 @@ def watch_tutorial(request, foss, tutorial, lang):
                             completed_tutorial_dict[tut_id] = True
                     except:
                         continue
-
-                # number of times visited previously
-                language_visit_count = user['fosses'][foss_id][language_id][tutorial_id]['visit_count']
-                language_visit_count += 1
         
                 start_time = user['fosses'][foss_id][language_id][tutorial_id]['curr_time'] * 60
 
@@ -379,16 +396,6 @@ def watch_tutorial(request, foss, tutorial, lang):
             pass
 
         
-        language_visit_count_field = 'fosses.' + str(foss_id) + '.' + str(language_id) + '.' + str(tutorial_id) + '.visit_count'
-        visits_field = 'fosses.' + str(foss_id) + '.' + str(language_id) + '.' + str(tutorial_id) + '.visits'
-        visit_number_field = visits_field + '.' + str (language_visit_count)
-        last_watched_tut_url_field = 'fosses.' + str(foss_id) + '.last_watched_tut_url'
-
-        tutorial_progress_logs.find_one_and_update(
-            { "username" : str(request.user.username) }, 
-            { "$set" : { visit_number_field: {}, language_visit_count_field: language_visit_count, last_watched_tut_url_field: last_watched_tut_url } },
-            upsert=True
-        )
 
     except Exception as e:
         messages.error(request, str(e))

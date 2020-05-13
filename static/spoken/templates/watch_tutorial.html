@@ -263,11 +263,16 @@
 {% block title %}{{ tr_rec.tutorial_detail.tutorial }} - {{ tr_rec.language.name }}{% endblock %}
 {% block search %}{% endblock %}
 {% block heading %}{{ tr_rec.tutorial_detail.tutorial }} - {{ tr_rec.language.name }}
+
+{% if user.is_authenticated %}
     {% if completed %}
         <b><h4 class="page-title" id="completed" style="color: green;">Completed</h4></b>
     {% else %}
         <b><h4 class="page-title" id="completed" style="color: orange;">Not Completed</h4></b>
     {% endif %}
+{% else %}
+    <h4 class="page-title" id="completed">Please log in to see tutorial completion status.</h4>
+{% endif %}
 
 {% endblock %}
 {% block content %}
@@ -353,24 +358,29 @@
                 </div>
 
                 <div id="playlist_completion">
-
-                    {% if rec.tutorial_detail.id == tr_rec.tutorial_detail.id %}
-            
-                        {% if completed_tutorial_dict|get_item:rec.tutorial_detail.id %}
-                            <p id="playlist_curr_tutorial" style="color: green;"><b>Completed: </b>Yes</p>
+                    {% if user.is_authenticated %}
+                        {% if rec.tutorial_detail.id == tr_rec.tutorial_detail.id %}
+                
+                            {% if completed_tutorial_dict|get_item:rec.tutorial_detail.id %}
+                                <p id="playlist_curr_tutorial" style="color: green;"><b>Completed: </b>Yes</p>
+                            {% else %}
+                                <p id="playlist_curr_tutorial" style="color: orange;"><b>Completed: </b>No</p>
+                            {% endif %}
+                        
                         {% else %}
-                            <p id="playlist_curr_tutorial" style="color: orange;"><b>Completed: </b>No</p>
+                            
+                            {% if completed_tutorial_dict|get_item:rec.tutorial_detail.id %}
+                                <p style="color: green;"><b>Completed: </b>Yes</p>
+                            {% else %}
+                                <p style="color: orange;"><b>Completed: </b>No</p>
+                            {% endif %}
+
                         {% endif %}
                     
                     {% else %}
-                        
-                        {% if completed_tutorial_dict|get_item:rec.tutorial_detail.id %}
-                            <p style="color: green;"><b>Completed: </b>Yes</p>
-                        {% else %}
-                            <p style="color: orange;"><b>Completed: </b>No</p>
-                        {% endif %}
-
+                        <p style="color: skyblue;"><b>Log in to see your completion progress.</p>
                     {% endif %}
+
 
                 </div>
                 
@@ -550,73 +560,88 @@
     <script type="text/javascript">
         $(document).ready(function(){
 
+            var user_is_authenticated = {{ user.is_authenticated|yesno:"true,false" }};
+
             // functionality of the Mark as Complete button
             $("#mark_as_complete").click(function(e) {
                 e.preventDefault();
-                $.ajax({
-                    type: "POST",
-                    url: "/logs/change_completion/",
-                    data: {
-                        username: "{{ user }}",
-                        completed: true,
-                        foss: "{{ tr_rec.tutorial_detail.foss.foss }}",
-                        foss_lang: "{{ tr_rec.language.name }}",
-                        tutorial: "{{ tr_rec.tutorial_detail.tutorial }}",
-                        foss_id: "{{ tr_rec.tutorial_detail.foss.id }}",
-                        tutorial_id: "{{ tutorial_id }}",
-                        language_id: "{{ tr_rec.language.id }}",
-                    },
-                    success: function(result) {
-                        $('#completed').html('Completed')
-                        $('#completed').css({
-                            'color': 'green',
-                        });
 
-                        $('#playlist_curr_tutorial').html('Completed: Yes')
-                        $('#playlist_curr_tutorial').css({
-                            'color': 'green',
-                        });
+                if (user_is_authenticated === false)
+                    alert("Please log in to change your completion status.");
 
-                    },
-                    error: function(result) {
-                        alert(result);
-                    }
-                });
+                else
+                {
+                    $.ajax({
+                        type: "POST",
+                        url: "/logs/change_completion/",
+                        data: {
+                            username: "{{ user }}",
+                            completed: true,
+                            foss: "{{ tr_rec.tutorial_detail.foss.foss }}",
+                            foss_lang: "{{ tr_rec.language.name }}",
+                            tutorial: "{{ tr_rec.tutorial_detail.tutorial }}",
+                            foss_id: "{{ tr_rec.tutorial_detail.foss.id }}",
+                            tutorial_id: "{{ tutorial_id }}",
+                            language_id: "{{ tr_rec.language.id }}",
+                        },
+                        success: function(result) {
+                            $('#completed').html('Completed')
+                            $('#completed').css({
+                                'color': 'green',
+                            });
+
+                            $('#playlist_curr_tutorial').html('Completed: Yes')
+                            $('#playlist_curr_tutorial').css({
+                                'color': 'green',
+                            });
+
+                        },
+                        error: function(result) {
+                            alert(result);
+                        }
+                    });
+                }
             });
             
             // functionality of the Mark as Incomplete button
             $("#mark_as_incomplete").click(function(e) {
                 e.preventDefault();
-                $.ajax({
-                    type: "POST",
-                    url: "/logs/change_completion/",
-                    data: { 
-                        username: "{{ user }}",
-                        completed: false,
-                        foss: "{{ tr_rec.tutorial_detail.foss.foss }}",
-                        foss_lang: "{{ tr_rec.language.name }}",
-                        tutorial: "{{ tr_rec.tutorial_detail.tutorial }}",
-                        foss_id: "{{ tr_rec.tutorial_detail.foss.id }}",
-                        tutorial_id: "{{ tutorial_id }}",
-                        language_id: "{{ tr_rec.language.id }}",
-                    },
-                    success: function(result) {
+                if (user_is_authenticated === false)
+                    alert("Please log in to change you completion status.");
 
-                        $('#completed').html('Not Completed')
-                        $('#completed').css({
-                            'color': 'orange',
-                        });
+                else
+                {
+                    $.ajax({
+                        type: "POST",
+                        url: "/logs/change_completion/",
+                        data: { 
+                            username: "{{ user }}",
+                            completed: false,
+                            foss: "{{ tr_rec.tutorial_detail.foss.foss }}",
+                            foss_lang: "{{ tr_rec.language.name }}",
+                            tutorial: "{{ tr_rec.tutorial_detail.tutorial }}",
+                            foss_id: "{{ tr_rec.tutorial_detail.foss.id }}",
+                            tutorial_id: "{{ tutorial_id }}",
+                            language_id: "{{ tr_rec.language.id }}",
+                        },
+                        success: function(result) {
 
-                        $('#playlist_curr_tutorial').html('Completed: No')
-                        $('#playlist_curr_tutorial').css({
-                            'color': 'orange',
-                        });
+                            $('#completed').html('Not Completed')
+                            $('#completed').css({
+                                'color': 'orange',
+                            });
 
-                    },
-                    error: function(result) {
-                        alert(result);
-                    }
-                });
+                            $('#playlist_curr_tutorial').html('Completed: No')
+                            $('#playlist_curr_tutorial').css({
+                                'color': 'orange',
+                            });
+
+                        },
+                        error: function(result) {
+                            alert(result);
+                        }
+                    });
+                }
             });
 
             currentVideo = $('.playlist-item.active');
@@ -655,7 +680,6 @@
     </script>
 
     <script>
-
     var player,
     tag = document.createElement('script'),
     firstScriptTag = document.getElementsByTagName('script')[0];
@@ -815,10 +839,8 @@
                     setForum(cur_time)
                 });
                 
-                
                 // storing tutorial video progress when the minute changes
                 if (Math.abs(parseInt(currentTime / 60) - previous_log_save_time) >= 1 && user_is_authenticated === true) {
-                    
                     previous_log_save_time = parseInt(currentTime / 60)
 
                     tutorial_progress_data = {
@@ -866,6 +888,7 @@
                                             language_id: "{{ tr_rec.language.id }}",
                                         },
                                         success: function(response) { 
+                                            
                                             $('#completed').html('Completed')
                                             $('#completed').css({
                                                 'color': 'green',
@@ -878,7 +901,7 @@
                                             });
                                         },
                                         error: function(xhr, status, err) {
-                                            // do nothing
+                                            console.log (err)
                                         }
                                     });
                                 }
@@ -887,7 +910,6 @@
                                 console.log(xhr.responseText);
                             }
                     });
-                    
                 }
 
 				function setForum(cur_time)
