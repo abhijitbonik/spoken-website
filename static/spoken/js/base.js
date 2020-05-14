@@ -154,3 +154,86 @@ $('.reset-filter').click(
 })(window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga');
 ga('create', 'UA-57761078-1', 'auto');
 ga('send', 'pageview');
+
+function setCookie(name,value,days) {
+    var expires = "";
+    if (days) {
+        var date = new Date();
+        date.setTime(date.getTime() + (days*24*60*60*1000));
+        expires = "; expires=" + date.toUTCString();
+    }
+    document.cookie = name + "=" + (value || "")  + expires + "; path=/";
+}
+
+function getCookie(name) {
+    var nameEQ = name + "=";
+    var ca = document.cookie.split(';');
+    for(var i=0;i < ca.length;i++) {
+        var c = ca[i];
+        while (c.charAt(0)==' ') c = c.substring(1,c.length);
+        if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+    }
+    return null;
+}
+
+// extracting event log info, AFTER the page has fully loaded.
+window.addEventListener('load', (event) => {
+
+    let url_name = window.location.href;
+
+    let browser_info = navigator.userAgent;
+    
+    let visited_by = user;  // check base.html, the variable 'user' is defined there.
+
+    // let method = "GET";
+
+    let datetime = new Date().getTime();
+
+    let first_time_visit = true;
+
+    if (getCookie('visited_before'))
+        first_time_visit = false;
+
+    setCookie('visited_before', true, 180);
+
+    // using geoplugin for IP details and geolocation 
+
+    let ip_address = geoplugin_request();
+
+    let country = geoplugin_countryName();
+    let region = geoplugin_region();
+    let city = geoplugin_city();
+
+    // Alternatively, can use ipinfo
+    // jQuery.get("http://ipinfo.io", function(response) {
+    //     country = response.country
+    //     region = response.region
+    //     city = response.city
+    // }, "jsonp");
+    
+
+    $.ajax({
+        type: "POST",
+        url: "http://127.0.0.1:8001/logs_api/save_website_log/",
+        data: {
+            
+            url_name: url_name,
+            browser_info: browser_info,
+            visited_by: visited_by,
+            ip_address: ip_address,
+            method: method,
+            datetime: datetime,
+            first_time_visit: first_time_visit,
+            country: country,
+            region: region,
+            city: city,
+        },
+        success: function(response) {
+            // the tutorial progress log was successfully saved. 
+            console.log("Success");
+        },
+        error: function(xhr, status, err) {
+            console.log(err);
+        }
+    });
+});
