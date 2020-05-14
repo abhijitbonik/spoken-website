@@ -2,7 +2,6 @@
 from __future__ import absolute_import, unicode_literals
 
 from celery import shared_task
-from logs.models import WebsiteLogs
 from pymongo import MongoClient
 import datetime
 

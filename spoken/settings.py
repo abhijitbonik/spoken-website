@@ -172,17 +172,6 @@ DATABASES = {
         'HOST': '',                  # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
         'PORT': '',                  # Set to empty string for default.
     },
-    'logs': {
-        'ENGINE': 'djongo',
-        'NAME': 'logs',
-        'ENFORCE_SCHEMA': True,
-        # 'HOST': 'localhost',
-        # 'PORT': port_number,
-        # 'USER': 'db-username',
-        # 'PASSWORD': 'password',
-        # 'AUTH_SOURCE': 'db-name',
-        # 'AUTH_MECHANISM': 'SCRAM-SHA-1'
-    }
 }
 
 
@@ -273,7 +262,6 @@ DATABASE_ROUTERS = [
     'cdeep.router.CdeepRouter',
     'workshop.router.WorkshopRouter',
     'forums.router.ForumsRouter',
-    'logs.router.LogsRouter'
 ]
 #AUTHENTICATION_BACKENDS = ( 'mdldjango.backend.MdlBackend', )
 
