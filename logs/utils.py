@@ -10,14 +10,8 @@ from django.contrib.gis.geoip2 import GeoIP2
 from geoip2.errors import AddressNotFoundError
 
 # mongo client
-from spoken import MONGO_CLIENT
+from spoken import REDIS_CLIENT, MONGO_CLIENT
 
-# configurations for redis
-redis_client = redis.Redis(
-    host = 'localhost',
-    port = 6379,
-    db = 0
-)
 
 # initializing the GeoIP2 client
 g = GeoIP2()
@@ -52,7 +46,7 @@ def enqueue_log(data):
             data["city"] = "Unknown"
 
         # enqueue job in the redis queue named 'tasks2'
-        redis_client.rpush('tasks', json.dumps(data))
+        REDIS_CLIENT.rpush('tasks', json.dumps(data))
 
     except Exception as e:
         with open ("enqueue_logs_errors.txt", "a") as f:
