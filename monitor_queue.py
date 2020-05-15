@@ -59,7 +59,7 @@ while (True):
 
             t0 = time.clock()
 
-            if settings.USE_CELERY_LOGGING:
+            if settings.SAVE_LOGS_WITH_CELERY:
 
                 dump_json_logs.delay(logs)
 
