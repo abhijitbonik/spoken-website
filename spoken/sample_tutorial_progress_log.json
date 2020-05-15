@@ -1,0 +1,70 @@
+{
+    "_id": "5ebe41e6f51bef57de5cdc04",
+    "username": "krithikvaidya",
+    "fosses": {
+      "48": {
+        "6": {
+          "last_watched_tut_url": "/watch/BASH/Introduction+to+BASH+Shell+Scripting/Hindi",
+          "478": {
+            "visit_count": 1,
+            "curr_time": 2,
+            "visits": {
+              "1": {
+                "minute-0": [
+                  "2020-05-15T12:48:51.381Z"
+                ],
+                "minute-1": [
+                  "2020-05-15T12:48:52.469Z"
+                ],
+                "minute-2": [
+                  "2020-05-15T12:48:57.899Z"
+                ]
+              }
+            }
+          }
+        },
+        "22": {
+          "last_watched_tut_url": "/watch/BASH/Introduction+to+BASH+Shell+Scripting/English",
+          "478": {
+            "visit_count": 3,
+            "curr_time": 7,
+            "completed": true,
+            "visits": {
+              "1": {
+                "minute-0": [
+                  "2020-05-15T12:46:56.650Z"
+                ],
+                "minute-1": [
+                  "2020-05-15T12:47:01.244Z"
+                ],
+                "minute-2": [
+                  "2020-05-15T12:47:03.182Z"
+                ],
+                "minute-3": [
+                  "2020-05-15T12:47:06.076Z"
+                ]
+              },
+              "2": {},
+              "3": {
+                "minute-3": [
+                  "2020-05-15T12:47:27.731Z"
+                ],
+                "minute-4": [
+                  "2020-05-15T12:47:32.310Z"
+                ],
+                "minute-5": [
+                  "2020-05-15T12:47:34.644Z"
+                ],
+                "minute-6": [
+                  "2020-05-15T12:47:35.415Z"
+                ],
+                "minute-7": [
+                  "2020-05-15T12:47:37.095Z"
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  }

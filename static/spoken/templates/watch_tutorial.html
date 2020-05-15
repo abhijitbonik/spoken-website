@@ -404,8 +404,10 @@
     <row>
         <div class="inner-content-body col-lg-8 col-md-8 col-sm-8 no-padding">
             <div class="completion-control">
-                <button type="button" class="btn btn-success" id="mark_as_complete">Mark Tutorial as Complete</button>
-                <button type="button" class="btn btn-warning" id="mark_as_incomplete">Mark Tutorial as Incomplete</button>
+                {% if user.is_authenticated %}
+                    <button type="button" class="btn btn-success" id="mark_as_complete">Mark Tutorial as Complete</button>
+                    <button type="button" class="btn btn-warning" id="mark_as_incomplete">Mark Tutorial as Incomplete</button>
+                {% endif %}
             </div>
             <div class="inner-shadow">
                 <div class="row video-share">
