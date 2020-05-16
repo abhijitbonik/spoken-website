@@ -176,13 +176,98 @@ function getCookie(name) {
     return null;
 }
 
+var os = [
+    { name: 'Windows Phone', value: 'Windows Phone', version: 'OS' },
+    { name: 'Windows', value: 'Win', version: 'NT' },
+    { name: 'iPhone', value: 'iPhone', version: 'OS' },
+    { name: 'iPad', value: 'iPad', version: 'OS' },
+    { name: 'Kindle', value: 'Silk', version: 'Silk' },
+    { name: 'Android', value: 'Android', version: 'Android' },
+    { name: 'PlayBook', value: 'PlayBook', version: 'OS' },
+    { name: 'BlackBerry', value: 'BlackBerry', version: '/' },
+    { name: 'Macintosh', value: 'Mac', version: 'OS X' },
+    { name: 'Linux', value: 'Linux', version: 'rv' },
+    { name: 'Palm', value: 'Palm', version: 'PalmOS' }
+];
+
+var browser = [
+    { name: 'Chrome', value: 'Chrome', version: 'Chrome' },
+    { name: 'Firefox', value: 'Firefox', version: 'Firefox' },
+    { name: 'Safari', value: 'Safari', version: 'Version' },
+    { name: 'Internet Explorer', value: 'MSIE', version: 'MSIE' },
+    { name: 'Opera', value: 'Opera', version: 'Opera' },
+    { name: 'BlackBerry', value: 'CLDC', version: 'CLDC' },
+    { name: 'Mozilla', value: 'Mozilla', version: 'Mozilla' }
+];
+
+var header = [
+    navigator.platform,
+    navigator.userAgent,
+    navigator.appVersion,
+    navigator.vendor,
+    window.opera
+];
+
+function matchItem(string, data) {
+    var i = 0,
+        j = 0,
+        html = '',
+        regex,
+        regexv,
+        match,
+        matches,
+        version;
+    
+    for (i = 0; i < data.length; i += 1) {
+        regex = new RegExp(data[i].value, 'i');
+        match = regex.test(string);
+        if (match) {
+            regexv = new RegExp(data[i].version + '[- /:;]([\d._]+)', 'i');
+            matches = string.match(regexv);
+            version = '';
+            if (matches) { if (matches[1]) { matches = matches[1]; } }
+            if (matches) {
+                matches = matches.split(/[._]+/);
+                for (j = 0; j < matches.length; j += 1) {
+                    if (j === 0) {
+                        version += matches[j] + '.';
+                    } else {
+                        version += matches[j];
+                    }
+                }
+            } else {
+                version = '0';
+            }
+            return {
+                name: data[i].name,
+                version: parseFloat(version)
+            };
+        }
+    }
+    return { name: 'unknown', version: 0 };
+}
+
 // extracting event log info, AFTER the page has fully loaded.
 window.addEventListener('load', (event) => {
 
+    console.log ('\n\nhmm\n\n')
     let url_name = window.location.href;
 
-    let browser_info = navigator.userAgent;
+    let agent = header.join(' ');
+    let OS = matchItem(agent, os);
+    let Browser = matchItem(agent, browser);
     
+    let os_name = OS.name;
+    let os_version = OS.version;
+
+    let browser_name = Browser.name;
+    let browser_version = Browser.version;
+
+    let platform = navigator.platform;
+    let vendor = navigator.vendor;
+
+    let referer = document.referer;
+
     let visited_by = user;  // check base.html, the variable 'user' is defined there.
 
     // let method = "GET";
@@ -218,10 +303,15 @@ window.addEventListener('load', (event) => {
         data: {
             
             url_name: url_name,
-            browser_info: browser_info,
             visited_by: visited_by,
+            referer: referer,
+            os_name: os_name,
+            os_version: os_version,
+            browser_name: browser_name,
+            browser_version: browser_version,
+            platform: platform,
+            vendor: vendor,
             ip_address: ip_address,
-            method: method,
             datetime: datetime,
             first_time_visit: first_time_visit,
             country: country,
