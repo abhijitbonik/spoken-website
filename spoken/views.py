@@ -146,7 +146,8 @@ def tutorial_search(request):
     context = {}
     collection = None
     form = TutorialSearchForm()
-    foss_get = ''
+    foss_get = None
+    language_get = None
     show_on_homepage = 1
     queryset = TutorialResource.objects.filter(Q(status=1) | Q(status=2), tutorial_detail__foss__show_on_homepage = show_on_homepage)
 
@@ -204,7 +205,7 @@ def tutorial_search(request):
     context['collection'] = collection
     context['SCRIPT_URL'] = settings.SCRIPT_URL
     context['current_foss'] = foss_get
-
+    context['current_lang'] = language_get
     print (str (completed_tutorial_dict))
     context['completed_tutorial_dict'] = completed_tutorial_dict
         

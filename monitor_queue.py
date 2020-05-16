@@ -36,18 +36,18 @@ since the queue is a FIFO structure).
 """
 while (True):
 
-    if REDIS_CLIENT.llen('tasks') >= 1:
+    if REDIS_CLIENT.llen('tasks') >= 10000:
         
         try:
 
-            logs = REDIS_CLIENT.lrange('tasks', 0, 0)
+            logs = REDIS_CLIENT.lrange('tasks', 0, 9999)
 
             # trim the queue to remove the leftmost 10000 logs
             # TODO: check if there's any opportunity for data loss, i.e.
             # if it's possible for the queue size to increase between when the function 
             # ltrim() is called, and when the queue is actually trimmed. The newest logs
             # may be lost in this case.
-            REDIS_CLIENT.ltrim('tasks', start=1, end=REDIS_CLIENT.llen('tasks'))
+            REDIS_CLIENT.ltrim('tasks', start=10000, end=REDIS_CLIENT.llen('tasks'))
 
             for i in range(len(logs)):
 
