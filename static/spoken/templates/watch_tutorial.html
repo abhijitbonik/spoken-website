@@ -270,6 +270,8 @@
     {% else %}
         <b><h4 class="page-title" id="completed" style="color: orange;">Not Completed</h4></b>
     {% endif %}
+{% else %}
+    <h4 class="page-title" id="completed">Please log in to see tutorial completion status.</h4>
 {% endif %}
 
 {% endblock %}
@@ -374,6 +376,9 @@
                             {% endif %}
 
                         {% endif %}
+                    
+                    {% else %}
+                        <p style="color: skyblue;"><b>Log in to see your completion progress.</b></p>
                     {% endif %}
 
 
@@ -404,10 +409,8 @@
     <row>
         <div class="inner-content-body col-lg-8 col-md-8 col-sm-8 no-padding">
             <div class="completion-control">
-                {% if user.is_authenticated %}
-                    <button type="button" class="btn btn-success" id="mark_as_complete">Mark Tutorial as Complete</button>
-                    <button type="button" class="btn btn-warning" id="mark_as_incomplete">Mark Tutorial as Incomplete</button>
-                {% endif %}
+                <button type="button" class="btn btn-success" id="mark_as_complete">Mark Tutorial as Complete</button>
+                <button type="button" class="btn btn-warning" id="mark_as_incomplete">Mark Tutorial as Incomplete</button>
             </div>
             <div class="inner-shadow">
                 <div class="row video-share">

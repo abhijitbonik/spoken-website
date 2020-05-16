@@ -46,31 +46,8 @@ db.createCollection( "website_logs" , {
          first_time_visit: {
             bsonType: "bool",
             description: "Whether the visit was first time or returning. Required." },
-         referer: {
-            description: "The website which had the link that the user clicked on to visit this URL"
-         },
-         browser_family: {
-            bsonType: "string",
-            description: "The family of browsers the user's browser belongs to."
-         },
-         browser_version: {
-            bsonType: "string",
-            description: "Version of the user's browser"
-         },
-         operating_system_family: {
-            bsonType: "string",
-            description: "Family of operating systems the user's OS belongs to."
-         },
-         operating_system_version: {
-            bsonType: "string",
-            description: "Verson of the user's OS."
-         },
-         device_family: {
-            bsonType: "string",
-            description: "Family of devices that the user's device belongs to"
-            },
          }
       }
    }
-});
+})
 ```

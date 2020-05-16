@@ -97,7 +97,6 @@ INSTALLED_APPS = [
     'ckeditor',
     'cron',
     'logs',
-    'django_user_agents',
 ]
 
 
@@ -173,6 +172,17 @@ DATABASES = {
         'HOST': '',                  # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
         'PORT': '',                  # Set to empty string for default.
     },
+    'logs': {
+        'ENGINE': 'djongo',
+        'NAME': 'logs',
+        'ENFORCE_SCHEMA': True,
+        # 'HOST': 'localhost',
+        # 'PORT': port_number,
+        # 'USER': 'db-username',
+        # 'PASSWORD': 'password',
+        # 'AUTH_SOURCE': 'db-name',
+        # 'AUTH_MECHANISM': 'SCRAM-SHA-1'
+    }
 }
 
 
@@ -263,6 +273,7 @@ DATABASE_ROUTERS = [
     'cdeep.router.CdeepRouter',
     'workshop.router.WorkshopRouter',
     'forums.router.ForumsRouter',
+    'logs.router.LogsRouter'
 ]
 #AUTHENTICATION_BACKENDS = ( 'mdldjango.backend.MdlBackend', )
 
@@ -304,20 +315,6 @@ COMPRESS_CSS_FILTERS = (
     }
 }"""
 
-
-# Cache setting for django_user_agents
-# Cache backend is optional, but recommended to speed up user agent parsing
-CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
-        'LOCATION': '127.0.0.1:11211',
-    }
-}
-
-# Name of cache backend to cache user agents. If it not specified default
-# cache alias will be used. Set to `None` to disable caching.
-USER_AGENTS_CACHE = 'default'
-
 HTML_MINIFY = HTML_MINIFY
 RECAPTCHA_PUBLIC_KEY = '6Le8qf8SAAAAABV9wYBW99Jotv-EygJXIhMa_n54'
 RECAPTCHA_PRIVATE_KEY = '6Le8qf8SAAAAAF9CkucURPapw2vaDPrU4qMzfg73'
@@ -345,8 +342,7 @@ MIDDLEWARE = [
     #'masquerade.middleware.MasqueradeMiddleware',
     'django.contrib.redirects.middleware.RedirectFallbackMiddleware',
     'impersonate.middleware.ImpersonateMiddleware',
-    'logs.middleware.Logs',
-    'django_user_agents.middleware.UserAgentMiddleware',
+    'logs.middleware.Logs'
 ]
 
 GEOIP_PATH  = BASE_DIR + '/geodb/'
@@ -386,5 +382,3 @@ CKEDITOR_CONFIGS = {
 ANALYTICS_DATA = ''
 
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False  # required for checking returning visits
-
-SAVE_LOGS_WITH_CELERY = True
