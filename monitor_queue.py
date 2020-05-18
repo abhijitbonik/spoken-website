@@ -70,7 +70,9 @@ while (True):
                 #     logs[i]['datetime'] = datetime.datetime.strptime(logs[i]['datetime'], '%Y-%m-%d %H:%M:%S.%f')
         
                 # insert into MongoDB
-                website_logs.insert_many([logs[i] for i in range(len(logs))])
+                # the ordered=False option ensures that all the logs are attempted for insert,
+                # even if one of the intermediate logs fails the insertion.
+                website_logs.insert_many([logs[i] for i in range(len(logs))], ordered=False)
 
             t1 = time.clock() - t0
 

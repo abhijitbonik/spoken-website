@@ -25,7 +25,10 @@ def dump_json_logs(self, logs):
         for i in range (len(logs)):
             logs[i]['datetime'] = datetime.datetime.strptime(logs[i]['datetime'], '%Y-%m-%d %H:%M:%S.%f')
         
-        website_logs.insert_many([logs[i] for i in range(len(logs))])
+        # insert into MongoDB
+        # the ordered=False option ensures that all the logs are attempted for insert,
+        # even if one of the intermediate logs fails the insertion.
+        website_logs.insert_many([logs[i] for i in range(len(logs))], ordered=False)
 
     except Exception as exc:  # catching a generic exception
 
