@@ -570,7 +570,7 @@
                 {
                     $.ajax({
                         type: "POST",
-                        url: "/logs/change_completion/",
+                        url: "http://127.0.0.1:8001/logs_api/change_completion/",
                         data: {
                             username: "{{ user }}",
                             completed: true,
@@ -610,7 +610,7 @@
                 {
                     $.ajax({
                         type: "POST",
-                        url: "/logs/change_completion/",
+                        url: "http://127.0.0.1:8001/logs_api/change_completion/",
                         data: { 
                             username: "{{ user }}",
                             completed: false,
@@ -857,7 +857,7 @@
                     
                     $.ajax({
                             type: "POST",
-                            url: "/logs/save_tutorial_progress/",
+                            url: "http://127.0.0.1:8001/logs_api/save_tutorial_progress/",
                             data: tutorial_progress_data,
                             // beforeSend: function(xhr, settings) {
                             //     if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
@@ -874,7 +874,7 @@
                                 {
                                     $.ajax({
                                         type: "POST",
-                                        url: "/logs/check_completion/",
+                                        url: "http://127.0.0.1:8001/logs_api/check_completion/",
                                         data: {
                                             username: "{{ user }}",
                                             foss: "{{ tr_rec.tutorial_detail.foss.foss }}",
@@ -898,7 +898,7 @@
                                             });
                                         },
                                         error: function(xhr, status, err) {
-                                            console.log (err)
+                                            
                                         }
                                     });
                                 }

@@ -1,3 +1,6 @@
+# currently none of these functions are in use,
+# as they are being called in the other repository instead.
+
 from django.shortcuts import render
 from django.http import HttpResponse
 from .utils import update_tutorial_progress
