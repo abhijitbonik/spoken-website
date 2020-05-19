@@ -38,16 +38,6 @@ class Logs:
                     data['ip_address'] = request.META['REMOTE_ADDR']
                     data['method'] = request.method
                     data['datetime'] = str(datetime.datetime.now())
-                    data['referer'] = request.META.get('HTTP_REFERER', None)
-
-                    # device details
-                    data['browser_family'] = request.user_agent.browser.family
-                    data['browser_version'] = request.user_agent.browser.version_string
-
-                    data['operating_system_family'] = request.user_agent.os.family
-                    data['operating_system_version'] = request.user_agent.os.version_string
-
-                    data['device_family'] = request.user_agent.device.family
 
                     if 'has_visited' in request.session:
                         data['first_time_visit'] = False

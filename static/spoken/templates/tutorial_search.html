@@ -107,8 +107,8 @@
             <div style="clear: both;"></div>
             
 
-            {% if user.is_authenticated and current_foss and current_lang %}
-                <div class="well well-sm">
+            <div class="well well-sm">
+                {% if user.is_authenticated %}
                     <h4 style="text-align: center; padding-bottom: 5px;">Your course progress for <b>{{ collection.0.tutorial_detail.foss }}</b> in <b>{{ collection.0.language }}</b></h4>
                     <div class="progress">
                         <div class="progress-bar progress-bar-success progress-bar-striped active" role="progressbar"
@@ -117,13 +117,11 @@
                         </div>
                     </div>
                     <h4 style="text-align: center; padding-bottom: 5px;">Click <b><a href="{{ last_watched_tut_url }}">here</a></b> to continue where you left off.</h4>
-                </div>
-            {% elif not user.is_authenticated and current_foss and current_lang %}
-                <div class="well well-sm">
-                    <h5 style="text-align: center; padding-bottom: 5px;">Please <a href="/accounts/login">login</a> to see and save your course progress.</h5>
-                </div>
-            {% endif %}
             
+                {% else %}
+                    <h5 style="text-align: center; padding-bottom: 5px;">Please <a href="/accounts/login">login</a> to see and save your course progress.</h5>
+                {% endif %}
+            </div>
 
 
             {% for record in collection %}
@@ -143,6 +141,8 @@
                                     {% else %}
                                         <p style="color: orange;"><b>Completed: </b>No</p>
                                     {% endif %}
+                                {% else %}
+                                    <p><b>Completed: </b>?</p>
                                 {% endif %}
                             </dl>
                         </div>

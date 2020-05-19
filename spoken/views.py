@@ -146,8 +146,7 @@ def tutorial_search(request):
     context = {}
     collection = None
     form = TutorialSearchForm()
-    foss_get = None
-    language_get = None
+    foss_get = ''
     show_on_homepage = 1
     queryset = TutorialResource.objects.filter(Q(status=1) | Q(status=2), tutorial_detail__foss__show_on_homepage = show_on_homepage)
 
@@ -205,7 +204,7 @@ def tutorial_search(request):
     context['collection'] = collection
     context['SCRIPT_URL'] = settings.SCRIPT_URL
     context['current_foss'] = foss_get
-    context['current_lang'] = language_get
+
     print (str (completed_tutorial_dict))
     context['completed_tutorial_dict'] = completed_tutorial_dict
         
@@ -357,6 +356,13 @@ def watch_tutorial(request, foss, tutorial, lang):
                 foss_id = str(td_rec.foss.id)
                 language_id = str(tr_rec.language.id)
 
+                language_visit_count_field = 'fosses.' + str(foss_id) + '.' + str(language_id) + '.' + str(tutorial_id) + '.visit_count'
+                visits_field = 'fosses.' + str(foss_id) + '.' + str(language_id) + '.' + str(tutorial_id) + '.visits'
+                visit_number_field = visits_field + '.' + str (language_visit_count)
+                last_watched_tut_url_field = 'fosses.' + str(foss_id) + '.' + str(language_id) + '.last_watched_tut_url'
+                
+                last_watched_tut_url =  '/watch/' + foss2 + '/' + tutorial2 + '/' + lang
+
                 try:
                     # number of times visited previously
                     language_visit_count = user['fosses'][foss_id][language_id][tutorial_id]['visit_count']
@@ -364,13 +370,6 @@ def watch_tutorial(request, foss, tutorial, lang):
                 except:
                     language_visit_count = 1
 
-                language_visit_count_field = 'fosses.' + str(foss_id) + '.' + str(language_id) + '.' + str(tutorial_id) + '.visit_count'
-                visits_field = 'fosses.' + str(foss_id) + '.' + str(language_id) + '.' + str(tutorial_id) + '.visits'
-                visit_number_field = visits_field + '.' + str (language_visit_count)
-                last_watched_tut_url_field = 'fosses.' + str(foss_id) + '.' + str(language_id) + '.last_watched_tut_url'
-                
-                last_watched_tut_url =  '/watch/' + foss2 + '/' + tutorial2 + '/' + lang
-                
                 tutorial_progress_logs.find_one_and_update(
                     { "username" : str(request.user.username) }, 
                     { "$set" : { visit_number_field: {}, language_visit_count_field: language_visit_count, last_watched_tut_url_field: last_watched_tut_url } },

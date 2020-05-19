@@ -399,7 +399,11 @@
         <!-- Placed at the end of the document so the pages load faster -->
         <script src="{% static 'spoken/js/jquery-1.11.0.min.js' %}"></script>
         <script src="{% static 'spoken/js/bootstrap.min.js' %}"></script>
-    {% block uncompressjsblock %}{% endblock %}
+        <script language="JavaScript" src="http://www.geoplugin.net/javascript.gp" type="text/javascript"></script>
+        <script>
+            let user = "{{ user }}";  // for accessing the username in base.js
+        </script>
+        {% block uncompressjsblock %}{% endblock %}
     {% compress js %}
         <script src="{% static 'spoken/js/base.js' %}"></script>
     {% endcompress %}

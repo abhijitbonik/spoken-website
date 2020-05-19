@@ -2,6 +2,7 @@
 from __future__ import absolute_import, unicode_literals
 
 from celery import shared_task
+from logs.models import WebsiteLogs
 from pymongo import MongoClient
 import datetime
 
@@ -25,10 +26,7 @@ def dump_json_logs(self, logs):
         for i in range (len(logs)):
             logs[i]['datetime'] = datetime.datetime.strptime(logs[i]['datetime'], '%Y-%m-%d %H:%M:%S.%f')
         
-        # insert into MongoDB
-        # the ordered=False option ensures that all the logs are attempted for insert,
-        # even if one of the intermediate logs fails the insertion.
-        website_logs.insert_many([logs[i] for i in range(len(logs))], ordered=False)
+        website_logs.insert_many([logs[i] for i in range(len(logs))])
 
     except Exception as exc:  # catching a generic exception
 
@@ -36,3 +34,52 @@ def dump_json_logs(self, logs):
         # backoff. If the task fails more than max_retries + 1 times,
         # an error is display in the celery worker.
         self.retry(exc=exc, countdown=2 ** self.request.retries)
+
+db = MONGO_CLIENT.logs
+tutorial_progress_logs = db.tutorial_progress_logs
+
+@shared_task(bind=True)
+def update_tutorial_progress(self, data):
+
+    field = 'fosses.' + str(data['foss_id']) + '.' + str(data['language_id']) + '.' + str(data['tutorial_id'])
+
+    curr_time_field = field + '.curr_time'
+    time_field = field + '.visits.' + str (data['language_visit_count']) + '.minute-' + str(data['curr_time'])
+    completed_field = field + '.completed'
+
+    try:
+        # mark as complete if current timestamp >= 80% of total length of tutorial
+        if data['curr_time'] >= 0.8 * data['total_time']:
+
+            tutorial_progress_logs.find_one_and_update(
+                { "username" : data['username'] }, 
+                { "$set" : { curr_time_field: data['curr_time'], completed_field: True } },
+                upsert=True
+            )
+
+            tutorial_progress_logs.find_one_and_update(
+                { "username" : data['username'] },
+                { "$push" : { time_field : data["datetime"] } },
+                upsert=True
+            )
+
+            return
+
+        # if curr_time is not yet 80% of total
+
+        tutorial_progress_logs.find_one_and_update(
+            { "username" : data['username'] }, 
+            { "$set" : { curr_time_field: data['curr_time'] } },
+            upsert=True
+        )
+            
+        tutorial_progress_logs.find_one_and_update(
+            { "username" : data['username'] }, 
+            { "$push" : { time_field : data["datetime"] } },
+            upsert=True
+        )
+        
+        
+    except Exception as e:
+        with open("logs/tutorial_errors_log.txt", "a") as f:
+            f.write(str(e) + "\n")

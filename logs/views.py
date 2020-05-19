@@ -1,9 +1,6 @@
-# currently none of these functions are in use,
-# as they are being called in the other repository instead.
-
 from django.shortcuts import render
 from django.http import HttpResponse
-from .utils import update_tutorial_progress
+from .tasks import update_tutorial_progress
 import datetime
 import math
 
@@ -40,7 +37,7 @@ def save_tutorial_progress (request):
     data['language_visit_count'] = int (request.POST.get("language_visit_count"))
     data['datetime'] = datetime.datetime.fromtimestamp(int (request.POST.get("timestamp"))/1000)
 
-    update_tutorial_progress (data)
+    update_tutorial_progress.delay (data)
 
     return HttpResponse(status=200)
 
