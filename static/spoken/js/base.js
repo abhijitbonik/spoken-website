@@ -250,7 +250,8 @@ function matchItem(string, data) {
 // extracting event log info, AFTER the page has fully loaded.
 window.addEventListener('load', (event) => {
 
-    console.log ('\n\nhmm\n\n')
+    start = event.timeStamp;  // move it from onload to somewhere else?
+
     let url_name = window.location.href;
 
     let agent = header.join(' ');
@@ -288,6 +289,8 @@ window.addEventListener('load', (event) => {
     let country = geoplugin_countryName();
     let region = geoplugin_region();
     let city = geoplugin_city();
+    let latitude = geoplugin_latitude();
+    let longitude = geoplugin_longitude();
 
     // Alternatively, can use ipinfo
     // jQuery.get("http://ipinfo.io", function(response) {
@@ -317,6 +320,8 @@ window.addEventListener('load', (event) => {
             country: country,
             region: region,
             city: city,
+            latitude: latitude,
+            longitude: longitude,
         },
         success: function(response) {
             // the tutorial progress log was successfully saved. 
@@ -326,4 +331,12 @@ window.addEventListener('load', (event) => {
             console.log(err);
         }
     });
+});
+
+window.addEventListener('unload', function(event) {
+
+    // TODO: send this as AJAX request?
+    var time = event.timeStamp - start;
+    alert (time);
+
 });
