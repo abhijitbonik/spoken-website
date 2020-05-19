@@ -27,10 +27,14 @@ def enqueue_log(data):
 
         try:
             location = g.city(data['ip_address'])
+            data["latitude"] = location["latitude"]
+            data["longitude"] = location["longitude"]
             data["country"] = location["country_name"]
             data["city"] = location["city"]
             data['state_code'] = location["region"]
         except:
+            data["latitude"] = None
+            data["longitude"] = None
             data["country"] = "Unknown"
             data["city"] = "Unknown"
             data['state_code'] = "Unknown"

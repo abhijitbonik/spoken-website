@@ -68,8 +68,14 @@ db.createCollection( "website_logs" , {
          device_family: {
             bsonType: "string",
             description: "Family of devices that the user's device belongs to"
-            },
-         }
+         },
+         latitude: {
+            description: "Latitude"
+         },
+         longitude: {
+            description: "Longitude"
+         },
+         },
       }
    }
 });

@@ -155,5 +155,5 @@ TODO - continue where the user left off
        in use, and is defined in events/templatetags/tutorialprogress.py . Check if it's possible to move it somewhere else.  
 
 
-pip install pyyaml ua-parser user-agents
+pip install pyyaml ua-parser user-agents  
 pip install django-user-agents
