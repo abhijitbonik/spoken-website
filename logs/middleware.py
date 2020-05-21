@@ -48,6 +48,22 @@ class Logs:
                     data['operating_system_version'] = request.user_agent.os.version_string
 
                     data['device_family'] = request.user_agent.device.family
+                    data['device_type'] = 'Unknown'
+
+                    if request.user_agent.is_mobile:
+                        data['device_type'] = 'Mobile'
+                    
+                    if request.user_agent.is_tablet:
+                        data['device_type'] = 'Tablet'
+
+                    if request.user_agent.is_pc:
+                        data['device_type'] = 'PC'
+
+                    if request.user_agent.is_mobile:
+                        data['device_type'] = 'Mobile'
+
+                    if request.user_agent.is_bot:
+                        data['device_type'] = 'Search Engine Crawler/Spider'
 
                     if 'has_visited' in request.session:
                         data['first_time_visit'] = False

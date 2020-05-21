@@ -2,7 +2,6 @@
 from __future__ import absolute_import, unicode_literals
 
 from celery import shared_task
-from pymongo import MongoClient
 import datetime
 
 # mongo client
@@ -30,7 +29,7 @@ def dump_json_logs(self, logs):  # celery task for bulk insertion of logs into M
         # even if one of the intermediate logs fails the insertion.
         website_logs.insert_many([logs[i] for i in range(len(logs))], ordered=False)
 
-    except Exception as exc:  # catching a generic exception
+    except Exception as e:  # catching a generic exception
 
         # sending the task back into the queue with exponential
         # backoff. If the task fails more than max_retries + 1 times,
