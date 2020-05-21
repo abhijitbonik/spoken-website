@@ -1,4 +1,4 @@
-# currently this code does not serve any purpose
+# currently this code is not in use
 
 from builtins import object
 

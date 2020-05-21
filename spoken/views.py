@@ -151,7 +151,7 @@ def tutorial_search(request):
     show_on_homepage = 1
     queryset = TutorialResource.objects.filter(Q(status=1) | Q(status=2), tutorial_detail__foss__show_on_homepage = show_on_homepage)
 
-    # for course completion calculations
+    # for FOSS completion calculations
     completed_tutorial_dict = {}
     
     total_tutorials = 0
@@ -164,27 +164,32 @@ def tutorial_search(request):
             if foss_get and language_get:
 
                 collection = queryset.filter(tutorial_detail__foss__foss=foss_get, language__name=language_get).order_by('tutorial_detail__level', 'tutorial_detail__order')
+                
+                # If the user has selected both, the FOSS and the language on the tutorial search page,
+                # then we extract the required data for showing course completion percentage and
+                # completion/non-completion status for each tutorial of that FOSS in that language.
                 total_tutorials = collection.count()
 
                 log = tutorial_progress_logs.find_one({ "username" : str(request.user.username) })
                 
-                # todo: check if collection empty
                 if log:
                     try:
 
                         foss_log = log['fosses'][str(collection[0].tutorial_detail.foss.id)]
+                        foss_lang_log = foss_log[str(collection[0].language.id)]
 
-                        if foss_log[str(collection[0].language.id)] is not None:
+                        if foss_lang_log:
 
-                            context['last_watched_tut_url'] = foss_log[str(collection[0].language.id)]['last_watched_tut_url']
-                            
-                            for key, details in foss_log[str(collection[0].language.id)].items():
-                                
+                            context['last_watched_tut_url'] = foss_lang_log['last_watched_tut_url']
+
+                            for key, details in foss_lang_log.items():
+
                                 if key != 'last_watched_tut_url' and details["completed"]:
                                     completed_tutorial_dict[str(key)] = True
                     
-                    except Exception as e:
-                        print ('\n\n' + str (e) + '\n\n')
+                    except Exception:
+                        # do nothing
+                        pass
 
                 context['completion_percentage'] = int ( (len(completed_tutorial_dict) / total_tutorials) * 100)
 
@@ -206,7 +211,7 @@ def tutorial_search(request):
     context['SCRIPT_URL'] = settings.SCRIPT_URL
     context['current_foss'] = foss_get
     context['current_lang'] = language_get
-    print (str (completed_tutorial_dict))
+
     context['completed_tutorial_dict'] = completed_tutorial_dict
         
     return render(request, 'spoken/templates/tutorial_search.html', context)
@@ -324,8 +329,10 @@ def archived_tutorial_search(request):
 
 def watch_tutorial(request, foss, tutorial, lang):
     try:
-        foss2 = foss
-        tutorial2 = tutorial
+
+        foss_partial_url = foss
+        tutorial_partial_url = tutorial
+
         foss = unquote_plus(foss)
         tutorial = unquote_plus(tutorial)
         td_rec = TutorialDetail.objects.get(foss__foss=foss, tutorial=tutorial)
@@ -335,23 +342,24 @@ def watch_tutorial(request, foss, tutorial, lang):
         questions = Question.objects.filter(category=td_rec.foss.foss.replace(
             ' ', '-'), tutorial=td_rec.tutorial.replace(' ', '-')).order_by('-date_created')
         
-        start_time = 0
-        language_visit_count = 1
+        start_time = 0  # the timestamp at which the tutorial video should start playing
+        language_visit_count = 1  # number of times the user has visited the
+                                  # given tutorial of the given FOSS in the given language.
         completed = False
-        completed_tutorial_dict = {}
+        completed_tutorial_dict = {}  # for displaying competion/non-completion status in the playlist.
         
         try:
             if request.user.is_authenticated:
 
-                # mongo settings
+                # configure pymongo
                 db = MONGO_CLIENT.logs
                 tutorial_progress_logs = db.tutorial_progress_logs
 
                 user = tutorial_progress_logs.find_one({ "username": str(request.user.username) })
 
-                foss_name = str(tr_rec.tutorial_detail.foss.foss)
-                tutorial_name = str(tr_rec.tutorial_detail.tutorial)
-                foss_lang = tr_rec.language.name
+                # foss_name = str(tr_rec.tutorial_detail.foss.foss)
+                # tutorial_name = str(tr_rec.tutorial_detail.tutorial)
+                # foss_lang = tr_rec.language.name
 
                 tutorial_id = str(td_rec.id)
                 foss_id = str(td_rec.foss.id)
@@ -361,15 +369,18 @@ def watch_tutorial(request, foss, tutorial, lang):
                     # number of times visited previously
                     language_visit_count = user['fosses'][foss_id][language_id][tutorial_id]['visit_count']
                     language_visit_count += 1
-                except:
+
+                except:  # the user has not visited the given tutorial of the given FOSS in the given
+                         # language previously.
                     language_visit_count = 1
 
+                # defining the fields for creation/updating in MongoDB.
                 language_visit_count_field = 'fosses.' + str(foss_id) + '.' + str(language_id) + '.' + str(tutorial_id) + '.visit_count'
                 visits_field = 'fosses.' + str(foss_id) + '.' + str(language_id) + '.' + str(tutorial_id) + '.visits'
                 visit_number_field = visits_field + '.' + str (language_visit_count)
                 last_watched_tut_url_field = 'fosses.' + str(foss_id) + '.' + str(language_id) + '.last_watched_tut_url'
                 
-                last_watched_tut_url =  '/watch/' + foss2 + '/' + tutorial2 + '/' + lang
+                last_watched_tut_url =  '/watch/' + foss_partial_url + '/' + tutorial_partial_url + '/' + lang
                 
                 tutorial_progress_logs.find_one_and_update(
                     { "username" : str(request.user.username) }, 
@@ -377,6 +388,7 @@ def watch_tutorial(request, foss, tutorial, lang):
                     upsert=True
                 )
 
+                # now, initialize the completed_tutorial_dict
                 for tut_id, tutorial_details in user['fosses'][foss_id][language_id].items():
 
                     try:

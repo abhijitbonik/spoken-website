@@ -19,3 +19,9 @@ REDIS_CLIENT = redis.Redis(
 from pymongo import MongoClient
 
 MONGO_CLIENT = MongoClient()
+
+
+# initializing the GeoIP2 client
+from django.contrib.gis.geoip2 import GeoIP2
+
+GEOIP2_CLIENT = GeoIP2()
