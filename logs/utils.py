@@ -22,16 +22,8 @@ def enqueue_log(data):
         if not re.match(r'^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$', data["ip_address"]):
             return
 
-        ips = ["15.194.44.177", "129.33.168.145", '46.228.130.180', '195.13.190.53', '146.235.167.153', 
-            '103.79.252.4', '67.231.228.190', '146.235.167.157', '88.89.235.241', '27.67.134.159',
-            '117.217.149.25', '202.134.153.244', '117.221.232.65', '115.96.110.248', '182.74.35.216', '27.61.140.192',
-            '202.83.21.148', '182.65.60.225', '106.77.155.162', '101.214.104.169', '103.120.153.54'
-        ]
-        import random
         # extract Geolocation info
-        
         try:
-            data["ip_address"] = random.choice(ips)
             location = GEOIP2_CLIENT.city(data['ip_address'])
             data["latitude"] = location["latitude"]
             data["longitude"] = location["longitude"]
@@ -48,19 +40,7 @@ def enqueue_log(data):
         data['region'] = None
 
         try:
-            t0 = time.clock()
             rg_result = rg.search((float (data["latitude"]), float (data["longitude"]))) 
-            t1 = time.clock() - t0
-
-            with open("enqueue_logs_errors.txt", "a") as f:
-                f.write(str(t1) + '\n')
-
-            t0 = time.clock()
-            rg_result = rg.search((float (data["latitude"]), float (data["longitude"]))) 
-            t1 = time.clock() - t0
-
-            with open("enqueue_logs_errors.txt", "a") as f:
-                f.write(str(t1) + '\n')
             data["region"] = rg_result[0]['admin1']
 
         except Exception:
