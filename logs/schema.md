@@ -14,9 +14,6 @@ db.createCollection( "website_logs" , {
             bsonType: "string", 
             pattern: "^/(.)*",
             description: "Webpage path. Required and must be a string beginning with /" }, 
-         browser_info: { 
-            bsonType: "string", 
-            description: "Browser info. Required and must be a string" }, 
          method: { 
             enum: [ "GET", "POST", "HEAD", "PUT", "DELETE", "CONNECT", "OPTIONS", "TRACE", "PATCH" ],
             description: "Required and must be a valid HTTP request method" }, 
@@ -34,9 +31,12 @@ db.createCollection( "website_logs" , {
          country: {
             bsonType: "string",
             description: "Country. Required and must be a country name or Unknown" },
-         state_code: {
+         region_code: {
             bsonType: "string",
             description: "State. Required and must be a state name or Unknown" },
+         region: {
+            bsonType: "string",
+            description: "State/UT. Required and must be a state/UT name or Unknown" },
          city: {
             bsonType: "string",
             description: "City. Required and must be a city name or Unknown" },
@@ -57,11 +57,11 @@ db.createCollection( "website_logs" , {
             bsonType: "string",
             description: "Version of the user's browser"
          },
-         operating_system_family: {
+         os_family: {
             bsonType: "string",
             description: "Family of operating systems the user's OS belongs to."
          },
-         operating_system_version: {
+         os_version: {
             bsonType: "string",
             description: "Verson of the user's OS."
          },
@@ -74,6 +74,10 @@ db.createCollection( "website_logs" , {
          },
          longitude: {
             description: "Longitude"
+         },
+         device_type: {
+            bsonType: "string",
+            description: "Device type. Required."
          },
          },
       }

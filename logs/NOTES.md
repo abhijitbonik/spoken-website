@@ -157,3 +157,4 @@ TODO - continue where the user left off
 
 pip install pyyaml ua-parser user-agents  
 pip install django-user-agents
+pip install reverse-geocoder

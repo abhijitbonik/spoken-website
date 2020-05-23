@@ -44,8 +44,8 @@ class Logs:
                     data['browser_family'] = request.user_agent.browser.family
                     data['browser_version'] = request.user_agent.browser.version_string
 
-                    data['operating_system_family'] = request.user_agent.os.family
-                    data['operating_system_version'] = request.user_agent.os.version_string
+                    data['os_family'] = request.user_agent.os.family
+                    data['os_version'] = request.user_agent.os.version_string
 
                     data['device_family'] = request.user_agent.device.family
                     data['device_type'] = 'Unknown'
