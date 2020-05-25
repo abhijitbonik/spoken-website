@@ -555,10 +555,13 @@
 {% endblock %}
 {% block compressinlinejsblock %}
     <script type="text/javascript">
+
+        var allow_completion_change = "true";
+
         $(document).ready(function(){
 
             var user_is_authenticated = {{ user.is_authenticated|yesno:"true,false" }};
-
+            
             // functionality of the Mark as Complete button
             $("#mark_as_complete").click(function(e) {
                 e.preventDefault();
@@ -632,6 +635,8 @@
                             $('#playlist_curr_tutorial').css({
                                 'color': 'orange',
                             });
+
+                            allow_completion_change = "false";
 
                         },
                         error: function(result) {
@@ -852,6 +857,7 @@
                         total_time: parseInt (trackedPlayer.duration() / 60),
                         timestamp: new Date().getTime(),
                         language_visit_count: "{{ language_visit_count }}",
+                        allow_completion_change: allow_completion_change,
                     }
                     
                     
@@ -870,7 +876,7 @@
                                 console.log("Success");
                                 
                                 // check if tutorial is marked as completed
-                                if ($('#completed').text() != "Completed")
+                                if ( allow_completion_change && ($('#completed').text() != "Completed"))
                                 {
                                     $.ajax({
                                         type: "POST",

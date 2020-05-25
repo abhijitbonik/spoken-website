@@ -75,7 +75,8 @@ class Logs:
                     request.session.set_expiry(15552000)  # 6 months, in seconds
 
                     try:
-                        requests.post("http://127.0.0.1:8001/logs_api/middleware_log/", data=data, timeout=0.0000000001)
+                        # set a very small timeout for the HTTP request, to simulate asynchronous behaviour.
+                        requests.post("http://127.0.0.1:8001/logs_api/save_middleware_log/", data=data, timeout=0.0000000001)
                     except requests.exceptions.ReadTimeout: 
                         pass
 
