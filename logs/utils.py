@@ -1,3 +1,4 @@
+# currently the code in this file is not in use
 
 import json
 from django.conf import settings
@@ -5,23 +6,64 @@ import time
 import re
 from geoip2.errors import AddressNotFoundError
 import reverse_geocoder as rg 
+import reverse_geocode
 
 # redis, mongo, geoip2 clients
 from spoken import REDIS_CLIENT, MONGO_CLIENT, GEOIP2_CLIENT
 
 
+REGION_CODE_TO_REGION = {
+    "AP": "Andhra Pradesh",
+    "AR": "Arunachal Pradesh",
+    "AS": "Assam",
+    "BR": "Bihar",
+    "CT": "Chhattisgarh",
+    "GA": "Goa",
+    "GJ": "Gujarat",
+    "HR": "Haryana",
+    "HP": "Himachal Pradesh",
+    "JK": "Jammu and Kashmir",
+    "JH": "Jharkhand",
+    "KA": "Karnataka",
+    "KL": "Kerala",
+    "MP": "Madhya Pradesh",
+    "MH": "Maharashtra",
+    "MN": "Manipur",
+    "ML": "Meghalaya",
+    "MZ": "Mizoram",
+    "NL": "Nagaland",
+    "OR": "Odisha",
+    "PB": "Punjab",
+    "RJ": "Rajasthan",
+    "SK": "Sikkim",
+    "TN": "Tamil Nadu",
+    "TG": "Telangana",
+    "TR": "Tripura",
+    "UP": "Uttar Pradesh",
+    "UT": "Uttarakhand",
+    "WB": "West Bengal",
+    "AN": "Andaman and Nicobar Islands",
+    "CH": "Chandigarh",
+    "DD": "Dadra and Nagar Haveli and Daman and Diu",
+    "LA": "Ladakh",
+    "LD": "Lakshadweep",
+    "DL": "Delhi",
+    "PY": "Puducherry",
+}
+
 """
 Function called from the middleware for extracting Geolocation info,
 and pushing the log to a redis queue.
+Currently API-based version of the function is in use.
 """
 def enqueue_log(data):
 
     try:
-
-        # if the IP address is not a properly formatted IPv4, reject it
+        # if the IPv4 or IPv6 address is not a properly formatted IPv4, reject it
         if not re.match(r'^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$', data["ip_address"]):
-            return
-
+            if not re.match(r'^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$', data['ip_address']):
+                return
+        
         # extract Geolocation info
         try:
             location = GEOIP2_CLIENT.city(data['ip_address'])
@@ -30,21 +72,14 @@ def enqueue_log(data):
             data["country"] = location["country_name"]
             data["city"] = location["city"]
             data['region_code'] = location["region"]
-        except:
+            data["region"] = REGION_CODE_TO_REGION.get(data["region_code"])
+        except:  # check https://pypi.org/project/geoip2/ for the exceptions thrown by GeoIP2
             data["latitude"] = None
             data["longitude"] = None
             data["country"] = "Unknown"
             data["city"] = "Unknown"
             data['region_code'] = "Unknown"
-
-        data['region'] = None
-
-        try:
-            rg_result = rg.search((float (data["latitude"]), float (data["longitude"]))) 
-            data["region"] = rg_result[0]['admin1']
-
-        except Exception:
-            pass
+            data["region"] = "Unknown"
 
         # sometimes the Geolocation may not return some of the fields
         if not data["country"]:

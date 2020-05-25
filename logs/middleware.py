@@ -3,18 +3,19 @@ import re
 from .utils import enqueue_log
 import datetime
 import asyncio
+import requests
 
-def getLoop():
+# def getLoop():
 
-    loop = None
+#     loop = None
     
-    try:
-        loop = asyncio.get_event_loop()
-    except RuntimeError:
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
+#     try:
+#         loop = asyncio.get_event_loop()
+#     except RuntimeError:
+#         loop = asyncio.new_event_loop()
+#         asyncio.set_event_loop(loop)
     
-    return loop
+#     return loop
 
 
 class Logs:
@@ -73,8 +74,13 @@ class Logs:
                     
                     request.session.set_expiry(15552000)  # 6 months, in seconds
 
-                    loop = getLoop()
-                    loop.run_in_executor(None, enqueue_log, data)
+                    try:
+                        requests.post("http://127.0.0.1:8001/logs_api/middleware_log/", data=data, timeout=0.0000000001)
+                    except requests.exceptions.ReadTimeout: 
+                        pass
+
+                    # loop = getLoop()
+                    # loop.run_in_executor(None, enqueue_log, data)
 
                     break
         
