@@ -345,7 +345,6 @@ MIDDLEWARE = [
     #'masquerade.middleware.MasqueradeMiddleware',
     'django.contrib.redirects.middleware.RedirectFallbackMiddleware',
     'impersonate.middleware.ImpersonateMiddleware',
-    'logs.middleware.Logs',
     'django_user_agents.middleware.UserAgentMiddleware',
 ]
 

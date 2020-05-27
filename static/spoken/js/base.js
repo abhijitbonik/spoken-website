@@ -154,3 +154,211 @@ $('.reset-filter').click(
 })(window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga');
 ga('create', 'UA-57761078-1', 'auto');
 ga('send', 'pageview');
+
+function setCookie(name,value,days) {
+    var expires = "";
+    if (days) {
+        var date = new Date();
+        date.setTime(date.getTime() + (days*24*60*60*1000));
+        expires = "; expires=" + date.toUTCString();
+    }
+    document.cookie = name + "=" + (value || "")  + expires + "; path=/";
+}
+
+function getCookie(name) {
+    var nameEQ = name + "=";
+    var ca = document.cookie.split(';');
+    for(var i=0;i < ca.length;i++) {
+        var c = ca[i];
+        while (c.charAt(0)==' ') c = c.substring(1,c.length);
+        if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+    }
+    return null;
+}
+
+var os = [
+    { name: 'Windows Phone', value: 'Windows Phone', version: 'OS' },
+    { name: 'Windows', value: 'Win', version: 'NT' },
+    { name: 'iPhone', value: 'iPhone', version: 'OS' },
+    { name: 'iPad', value: 'iPad', version: 'OS' },
+    { name: 'Kindle', value: 'Silk', version: 'Silk' },
+    { name: 'Android', value: 'Android', version: 'Android' },
+    { name: 'PlayBook', value: 'PlayBook', version: 'OS' },
+    { name: 'BlackBerry', value: 'BlackBerry', version: '/' },
+    { name: 'Macintosh', value: 'Mac', version: 'OS X' },
+    { name: 'Linux', value: 'Linux', version: 'rv' },
+    { name: 'Palm', value: 'Palm', version: 'PalmOS' }
+];
+
+var browser = [
+    { name: 'Chrome', value: 'Chrome', version: 'Chrome' },
+    { name: 'Firefox', value: 'Firefox', version: 'Firefox' },
+    { name: 'Safari', value: 'Safari', version: 'Version' },
+    { name: 'Internet Explorer', value: 'MSIE', version: 'MSIE' },
+    { name: 'Opera', value: 'Opera', version: 'Opera' },
+    { name: 'BlackBerry', value: 'CLDC', version: 'CLDC' },
+    { name: 'Mozilla', value: 'Mozilla', version: 'Mozilla' }
+];
+
+var header = [
+    navigator.platform,
+    navigator.userAgent,
+    navigator.appVersion,
+    navigator.vendor,
+    window.opera
+];
+
+function matchItem(string, data) {
+    var i = 0,
+        j = 0,
+        html = '',
+        regex,
+        regexv,
+        match,
+        matches,
+        version;
+    
+    for (i = 0; i < data.length; i += 1) {
+        regex = new RegExp(data[i].value, 'i');
+        match = regex.test(string);
+        if (match) {
+            regexv = new RegExp(data[i].version + '[- /:;]([\d._]+)', 'i');
+            matches = string.match(regexv);
+            version = '';
+            if (matches) { if (matches[1]) { matches = matches[1]; } }
+            if (matches) {
+                matches = matches.split(/[._]+/);
+                for (j = 0; j < matches.length; j += 1) {
+                    if (j === 0) {
+                        version += matches[j] + '.';
+                    } else {
+                        version += matches[j];
+                    }
+                }
+            } else {
+                version = '0';
+            }
+            return {
+                name: data[i].name,
+                version: parseFloat(version)
+            };
+        }
+    }
+    return { name: 'unknown', version: 0 };
+}
+
+// extracting event log info, AFTER the page has fully loaded.
+window.addEventListener('load', (event) => {
+
+    start = event.timeStamp;  // move it from onload to somewhere else?
+
+    let url_name = window.location.href;
+
+    let agent = header.join(' ');
+    let OS = matchItem(agent, os);
+    let Browser = matchItem(agent, browser);
+    
+    let os_name = OS.name;
+    let os_version = OS.version;
+
+    let browser_name = Browser.name;
+    let browser_version = Browser.version;
+
+    let platform = navigator.platform;
+    let vendor = navigator.vendor;
+
+    let referer = document.referer;
+
+    let visited_by = user;  // check base.html, the variable 'user' is defined there.
+
+    // let method = "GET";
+
+    let datetime = new Date().getTime();
+
+    let first_time_visit = true;
+
+    if (getCookie('visited_before'))
+        first_time_visit = false;
+
+    setCookie('visited_before', true, 180);
+
+    // using geoplugin for IP details and geolocation 
+
+    let ip_address = "";
+
+    let country = "";
+    let region = "";
+    let city = "";
+    let latitude = "";
+    let longitude = "";
+
+    // Alternatively, can use ipinfo
+    // jQuery.get("http://ipinfo.io", function(response) {
+    //     // country = response.country
+    //     // region = response.region
+    //     // city = response.city
+    //     console.log (response)
+    // }, "jsonp");
+
+    // fetch('http://www.geoplugin.net/json.gp').then(r=> r.json().then(j=> console.log(j)));
+    
+    $.get('https://freegeoip.app/json/', function(data) {
+
+        ip_address = data.ip;
+        country = data.country_name;
+        region = data.region_name;
+        city = data.city;
+        latitude = data.latitude;
+        longitude = data.longitude;
+
+        $.ajax({
+            type: "POST",
+            url: "http://192.168.100.6:8001/logs_api/save_js_log/",
+            data: {
+                
+                path_info: url_name,
+                event_name: document.title,
+                visited_by: visited_by,
+                referer: referer,
+                os_family: os_name,
+                os_version: os_version,
+                browser_family: browser_name,
+                browser_version: browser_version,
+                operating_system_family: platform,
+                vendor: vendor,
+                ip_address: ip_address,
+                datetime: datetime,
+                first_time_visit: first_time_visit,
+                country: country,
+                region: region,
+                city: city,
+                latitude: latitude,
+                longitude: longitude,
+            },
+            success: function(response) {
+                // the tutorial progress log was successfully saved. 
+                console.log("Success");
+            },
+            error: function(xhr, status, err) {
+                console.log(err);
+            }
+        });
+    });
+
+    // $.ajax({
+    //     type: "GET",
+    //     url: "https://freegeoip.app/json/",
+    //     success: function(response) {
+    //         console.log(response.country_name);
+    //     },
+    // });
+
+});
+
+window.addEventListener('unload', function(event) {
+
+    // TODO: send this as AJAX request?
+    var time = event.timeStamp - start;
+    alert (time);
+
+});
