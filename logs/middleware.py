@@ -39,6 +39,9 @@ class Logs:
                     data['ip_address'] = request.META['REMOTE_ADDR']
                     data['method'] = request.method
                     data['datetime'] = str(datetime.datetime.now())
+                    data['view_args'] = view_args
+                    data['view_kwargs'] = view_kwargs
+                    data['request'] = request.body
                     data['referer'] = request.META.get('HTTP_REFERER', None)
 
                     # device details
@@ -73,6 +76,21 @@ class Logs:
                         request.session['has_visited'] = True
                     
                     request.session.set_expiry(15552000)  # 6 months, in seconds
+
+                    if request.method == "POST":
+
+                        # Note that request.POST can contain multiple items for each key. 
+                        # If you are expecting multiple items for each key, you can use lists, 
+                        # which returns all values as a list.
+                        for key, values in request.POST.lists():
+
+                            if key != 'csrfmiddlewaretoken' and key != 'password':
+                                
+                                if len(values) == 1:
+                                    data[key] = values[0]
+
+                                else:
+                                    data[key] = values
 
                     try:
                         # set a very small timeout for the HTTP request, to simulate asynchronous behaviour.
