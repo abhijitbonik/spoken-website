@@ -155,6 +155,10 @@ $('.reset-filter').click(
 ga('create', 'UA-57761078-1', 'auto');
 ga('send', 'pageview');
 
+
+// Code related to user data logging from this point onwards.
+
+// Function to set value of a cookie
 function setCookie(name,value,days) {
     var expires = "";
     if (days) {
@@ -165,6 +169,8 @@ function setCookie(name,value,days) {
     document.cookie = name + "=" + (value || "")  + expires + "; path=/";
 }
 
+
+// Function to get value of a cookie
 function getCookie(name) {
     var nameEQ = name + "=";
     var ca = document.cookie.split(';');
@@ -176,106 +182,24 @@ function getCookie(name) {
     return null;
 }
 
-var os = [
-    { name: 'Windows Phone', value: 'Windows Phone', version: 'OS' },
-    { name: 'Windows', value: 'Win', version: 'NT' },
-    { name: 'iPhone', value: 'iPhone', version: 'OS' },
-    { name: 'iPad', value: 'iPad', version: 'OS' },
-    { name: 'Kindle', value: 'Silk', version: 'Silk' },
-    { name: 'Android', value: 'Android', version: 'Android' },
-    { name: 'PlayBook', value: 'PlayBook', version: 'OS' },
-    { name: 'BlackBerry', value: 'BlackBerry', version: '/' },
-    { name: 'Macintosh', value: 'Mac', version: 'OS X' },
-    { name: 'Linux', value: 'Linux', version: 'rv' },
-    { name: 'Palm', value: 'Palm', version: 'PalmOS' }
-];
+let datetime, url_name, title, referer, visited_by, method, first_time_visit, ip_address;
+let country, region, city, latitude, longitude, report, device_type;
 
-var browser = [
-    { name: 'Chrome', value: 'Chrome', version: 'Chrome' },
-    { name: 'Firefox', value: 'Firefox', version: 'Firefox' },
-    { name: 'Safari', value: 'Safari', version: 'Version' },
-    { name: 'Internet Explorer', value: 'MSIE', version: 'MSIE' },
-    { name: 'Opera', value: 'Opera', version: 'Opera' },
-    { name: 'BlackBerry', value: 'CLDC', version: 'CLDC' },
-    { name: 'Mozilla', value: 'Mozilla', version: 'Mozilla' }
-];
+// Extracting user data info, AFTER the DOM has fully loaded.
+$(document).ready(function () {
 
-var header = [
-    navigator.platform,
-    navigator.userAgent,
-    navigator.appVersion,
-    navigator.vendor,
-    window.opera
-];
+    url_name = window.location.href;
+    title = document.title;
 
-function matchItem(string, data) {
-    var i = 0,
-        j = 0,
-        html = '',
-        regex,
-        regexv,
-        match,
-        matches,
-        version;
-    
-    for (i = 0; i < data.length; i += 1) {
-        regex = new RegExp(data[i].value, 'i');
-        match = regex.test(string);
-        if (match) {
-            regexv = new RegExp(data[i].version + '[- /:;]([\d._]+)', 'i');
-            matches = string.match(regexv);
-            version = '';
-            if (matches) { if (matches[1]) { matches = matches[1]; } }
-            if (matches) {
-                matches = matches.split(/[._]+/);
-                for (j = 0; j < matches.length; j += 1) {
-                    if (j === 0) {
-                        version += matches[j] + '.';
-                    } else {
-                        version += matches[j];
-                    }
-                }
-            } else {
-                version = '0';
-            }
-            return {
-                name: data[i].name,
-                version: parseFloat(version)
-            };
-        }
-    }
-    return { name: 'unknown', version: 0 };
-}
+    referer = document.referer;
 
-// extracting event log info, AFTER the page has fully loaded.
-window.addEventListener('load', (event) => {
+    visited_by = user;  // check base.html, the variable 'user' is defined there.
 
-    start = event.timeStamp;  // move it from onload to somewhere else?
+    method = "GET";
 
-    let url_name = window.location.href;
+    datetime = new Date().getTime();
 
-    let agent = header.join(' ');
-    let OS = matchItem(agent, os);
-    let Browser = matchItem(agent, browser);
-    
-    let os_name = OS.name;
-    let os_version = OS.version;
-
-    let browser_name = Browser.name;
-    let browser_version = Browser.version;
-
-    let platform = navigator.platform;
-    let vendor = navigator.vendor;
-
-    let referer = document.referer;
-
-    let visited_by = user;  // check base.html, the variable 'user' is defined there.
-
-    // let method = "GET";
-
-    let datetime = new Date().getTime();
-
-    let first_time_visit = true;
+    first_time_visit = true;
 
     if (getCookie('visited_before'))
         first_time_visit = false;
@@ -284,13 +208,13 @@ window.addEventListener('load', (event) => {
 
     // using geoplugin for IP details and geolocation 
 
-    let ip_address = "";
+    ip_address = "";
 
-    let country = "";
-    let region = "";
-    let city = "";
-    let latitude = "";
-    let longitude = "";
+    country = "";
+    region = "";
+    city = "";
+    latitude = "";
+    longitude = "";
 
     // Alternatively, can use ipinfo
     // jQuery.get("http://ipinfo.io", function(response) {
@@ -302,6 +226,10 @@ window.addEventListener('load', (event) => {
 
     // fetch('http://www.geoplugin.net/json.gp').then(r=> r.json().then(j=> console.log(j)));
     
+    report = browserReportSync();
+
+    device_type = deviceDetector.device;
+
     $.get('https://freegeoip.app/json/', function(data) {
 
         ip_address = data.ip;
@@ -310,39 +238,6 @@ window.addEventListener('load', (event) => {
         city = data.city;
         latitude = data.latitude;
         longitude = data.longitude;
-
-        $.ajax({
-            type: "POST",
-            url: "http://192.168.100.6:8001/logs_api/save_js_log/",
-            data: {
-                
-                path_info: url_name,
-                event_name: document.title,
-                visited_by: visited_by,
-                referer: referer,
-                os_family: os_name,
-                os_version: os_version,
-                browser_family: browser_name,
-                browser_version: browser_version,
-                operating_system_family: platform,
-                vendor: vendor,
-                ip_address: ip_address,
-                datetime: datetime,
-                first_time_visit: first_time_visit,
-                country: country,
-                region: region,
-                city: city,
-                latitude: latitude,
-                longitude: longitude,
-            },
-            success: function(response) {
-                // the tutorial progress log was successfully saved. 
-                console.log("Success");
-            },
-            error: function(xhr, status, err) {
-                console.log(err);
-            }
-        });
     });
 
     // $.ajax({
@@ -355,10 +250,81 @@ window.addEventListener('load', (event) => {
 
 });
 
-window.addEventListener('unload', function(event) {
+let unloaded = false;
 
-    // TODO: send this as AJAX request?
-    var time = event.timeStamp - start;
-    alert (time);
+$(window).on('beforeunload', function() {
 
+    if (unloaded)
+        return;
+    unloaded = true;
+ 
+    let visit_duration = Math.round((new Date().getTime() - datetime) / 1000);
+    
+    $.ajax({
+        type: "POST",
+        url: "http://192.168.100.6:8001/logs_api/save_js_log/",
+        data: {
+            url_name: url_name,
+            title: title,
+            method: method,
+            event_name: document.title,
+            visited_by: visited_by,
+            referer: referer,
+            os_family: report.os.name,
+            os_version: report.os.version,
+            browser_family: report.browser.name,
+            browser_version: report.browser.version,
+            ip_address: ip_address,
+            datetime: datetime,
+            first_time_visit: first_time_visit,
+            country: country,
+            region: region,
+            city: city,
+            latitude: latitude,
+            longitude: longitude,
+            visit_duration: visit_duration,
+            device_type: device_type
+        },
+    });
+
+    
+});
+
+window.addEventListener("visibilitychange", function(e)
+{
+    if (document.visibilityState == 'hidden')
+    {
+        if (device_type == 'desktop' || unloaded)
+            return;
+        unloaded = true;
+        
+        let visit_duration = Math.round((new Date().getTime() - datetime) / 1000);
+        
+        $.ajax({
+            type: "POST",
+            url: "http://192.168.100.6:8001/logs_api/save_js_log/",
+            data: {
+                url_name: url_name,
+                title: title,
+                method: method,
+                event_name: document.title,
+                visited_by: visited_by,
+                referer: referer,
+                os_family: report.os.name,
+                os_version: report.os.version,
+                browser_family: report.browser.name,
+                browser_version: report.browser.version,
+                ip_address: ip_address,
+                datetime: datetime,
+                first_time_visit: first_time_visit,
+                country: country,
+                region: region,
+                city: city,
+                latitude: latitude,
+                longitude: longitude,
+                visit_duration: visit_duration,
+                device_type: device_type
+            },
+        });
+    }
 });

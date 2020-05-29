@@ -402,6 +402,8 @@
         <script>
             let user = "{{ user }}";  // for accessing the username in base.js
         </script>
+        <script src="{% static 'spoken/js/browser-report.js' %}"></script>   <!-- Browser Report -->
+        <script src="{% static 'spoken/js/devicedetector-min.js' %}"></script>
     {% block uncompressjsblock %}{% endblock %}
     {% compress js %}
         <script src="{% static 'spoken/js/base.js' %}"></script>
