@@ -42,7 +42,7 @@ class Logs:
                     data['view_args'] = view_args
                     data['view_kwargs'] = view_kwargs
                     data['request'] = request.body
-                    data['referer'] = request.META.get('HTTP_REFERER', None)
+                    data['referer'] = request.META.get('HTTP_REFERER', '(No referring link)')
 
                     # device details
                     data['browser_family'] = request.user_agent.browser.family
