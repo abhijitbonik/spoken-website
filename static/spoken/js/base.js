@@ -182,6 +182,39 @@ function getCookie(name) {
     return null;
 }
 
+
+// Adding event listeners to all links on the page, to track exit link activity.
+let links = document.getElementsByTagName('a')
+let exit_link_clicked;
+let exit_link_page;
+
+for(let i = 0; i < links.length; i++) {
+
+    links[i].addEventListener('click', function(event) {
+
+        exit_link_clicked = this.href;
+        let hostname = (new URL(exit_link_clicked)).hostname;
+
+        if (hostname != window.location.hostname)
+        {
+            exit_link_page = document.title;
+
+            $.ajax({
+                type: "POST",
+                url: "http://192.168.100.6:8001/logs_api/save_exit_info/",
+                data: {
+                    datetime: datetime,
+                    exit_link_clicked: exit_link_clicked,
+                    exit_link_page: exit_link_page
+                },
+            });
+        }
+
+        // return true;
+
+    });
+};
+
 let datetime, url_name, title, referer, visited_by, method, first_time_visit, ip_address;
 let country, region, city, latitude, longitude, report, device_type;
 
