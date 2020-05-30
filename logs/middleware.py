@@ -1,21 +1,8 @@
-from .urls_to_events import EVENT_NAME_DICT
+
+
 import re
-from .utils import enqueue_log
 import datetime
-import asyncio
 import requests
-
-# def getLoop():
-
-#     loop = None
-    
-#     try:
-#         loop = asyncio.get_event_loop()
-#     except RuntimeError:
-#         loop = asyncio.new_event_loop()
-#         asyncio.set_event_loop(loop)
-    
-#     return loop
 
 
 class Logs:
@@ -95,11 +82,9 @@ class Logs:
                     try:
                         # set a very small timeout for the HTTP request, to simulate asynchronous behaviour.
                         requests.post("http://192.168.100.6:8001/logs_api/save_middleware_log/", data=data, timeout=0.0000000001)
+                    
                     except requests.exceptions.ReadTimeout: 
                         pass
-
-                    # loop = getLoop()
-                    # loop.run_in_executor(None, enqueue_log, data)
 
                     break
         

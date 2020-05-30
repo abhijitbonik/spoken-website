@@ -387,6 +387,6 @@ ANALYTICS_DATA = ''
 
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False  # required for checking returning visits
 
-SAVE_LOGS_WITH_CELERY = True
+SAVE_LOGS_WITH_CELERY = True  # whether to save website logs with celery, or in monitor_queue.py itself.
 
-MONGO_BULK_INSERT_COUNT = 10000
+MONGO_BULK_INSERT_COUNT = 1  # change to 10000 later
