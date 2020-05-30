@@ -405,6 +405,7 @@
         <script src="{% static 'spoken/js/browser-report.js' %}"></script>   <!-- Browser Report -->
         <script src="{% static 'spoken/js/devicedetector-min.js' %}"></script>
         <script src="https://cdn.polyfill.io/v3/polyfill.min.js"></script>  <!-- IE11 does not support new URL(), used in base.js -->
+        <script src="https://maps.googleapis.com/maps/api/js?sensor=false"></script>
     {% block uncompressjsblock %}{% endblock %}
     {% compress js %}
         <script src="{% static 'spoken/js/base.js' %}"></script>

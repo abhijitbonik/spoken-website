@@ -216,10 +216,48 @@ for(let i = 0; i < links.length; i++) {
 };
 
 let datetime, url_name, title, referer, visited_by, method, first_time_visit, ip_address;
-let country, region, city, latitude, longitude, report, device_type;
+let country, region, city, latitude, longitude, report, device_type, use_ip_geolocation;
 
 // Extracting user data info, AFTER the DOM has fully loaded.
 $(document).ready(function () {
+
+    use_ip_geolocation = false;
+
+    let options = {
+        enableHighAccuracy: true,
+        timeout: 5000,  // wait 5 seconds to get high accuracy data. If 5 second window expires, go back to normal accuracy.
+        maximumAge: 0  // maximum age in milliseconds of a possible cached position that is acceptable to return. If set to 0, it means that the device cannot use a cached position and must attempt to retrieve the real current position.
+    };
+
+    function success(position) {
+        $.getJSON('https://nominatim.openstreetmap.org/reverse', {
+            lat: position.coords.latitude,
+            lon: position.coords.longitude,
+            format: 'json',
+        }, function (result) {
+            console.log (result)
+            latitude = position.coords.latitude;
+            longitude = position.coords.longitude;
+            country = result.country_name;
+            region = data.region_name;
+            city = data.city;
+        }); 
+    }
+
+    function error(err) {
+        
+        // Perform IP based geolocation using external API.
+
+        $.get('https://freegeoip.app/json/', function(data) {
+            country = data.country_name;
+            region = data.region_name;
+            city = data.city;
+            latitude = data.latitude;
+            longitude = data.longitude;
+        });
+    }
+
+    navigator.geolocation.getCurrentPosition(success, error, options);
 
     url_name = window.location.href;
     title = document.title;
@@ -241,14 +279,6 @@ $(document).ready(function () {
 
     // using geoplugin for IP details and geolocation 
 
-    ip_address = "";
-
-    country = "";
-    region = "";
-    city = "";
-    latitude = "";
-    longitude = "";
-
     // Alternatively, can use ipinfo
     // jQuery.get("http://ipinfo.io", function(response) {
     //     // country = response.country
@@ -259,19 +289,15 @@ $(document).ready(function () {
 
     // fetch('http://www.geoplugin.net/json.gp').then(r=> r.json().then(j=> console.log(j)));
     
-    report = browserReportSync();
-
-    device_type = deviceDetector.device;
-
-    $.get('https://freegeoip.app/json/', function(data) {
-
-        ip_address = data.ip;
-        country = data.country_name;
-        region = data.region_name;
-        city = data.city;
-        latitude = data.latitude;
-        longitude = data.longitude;
+    browserReport(function (err, browser_report) {
+        if (err) {
+            throw err;
+        }
+        report = browser_report;
+        ip_address = report.ip;
     });
+    
+    device_type = deviceDetector.device;
 
     // $.ajax({
     //     type: "GET",
