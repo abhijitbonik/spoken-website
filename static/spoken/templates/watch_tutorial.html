@@ -556,7 +556,7 @@
 {% block compressinlinejsblock %}
     <script type="text/javascript">
 
-        var allow_completion_change = "true";
+        var allow_completion_change = "true";  // will be set to false when user clicks 'Mark as Incomplete'.
 
         $(document).ready(function(){
 
@@ -787,48 +787,14 @@
            }
                         //for videojs trigger
             var trackedPlayer = videojs('st_video');
-            console.log ({{ start_time }});
             trackedPlayer.currentTime({{ start_time }}); 
             var previousTime = 0;
             var currentTime = 0;
-
-            // function getCookie(name) {
-            //     var cookieValue = null;
-            //     if (document.cookie && document.cookie !== '') {
-            //         var cookies = document.cookie.split(';');
-            //         for (var i = 0; i < cookies.length; i++) {
-            //             var cookie = cookies[i].trim();
-            //             // Does this cookie string begin with the name we want?
-            //             if (cookie.substring(0, name.length + 1) === (name + '=')) {
-            //                 cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-            //                 break;
-            //             }
-            //         }
-            //     }
-            //     return cookieValue;
-            // }
-
-            // var csrftoken = getCookie('csrftoken');
-
-            // function csrfSafeMethod(method) {
-            //     // these HTTP methods do not require CSRF protection
-            //     return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
-            // }
-            
-            // $.ajaxSetup({
-            //     beforeSend: function(xhr, settings) {
-            //         if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
-            //             xhr.setRequestHeader("X-CSRFToken", csrftoken);
-            //         }
-            //     }
-            // });
 
             var user_is_authenticated = {{ user.is_authenticated|yesno:"true,false" }};
             var previous_log_save_time = -1;
 
             trackedPlayer.on('timeupdate', function() {
-
-                // logic for updating tutorial timestamp
 
                 previousTime = currentTime;
                 currentTime = trackedPlayer.currentTime();
@@ -841,9 +807,10 @@
                     setForum(cur_time)
                 });
                 
-                // storing tutorial video progress when the minute changes
-                if (Math.abs(parseInt(currentTime / 60) - previous_log_save_time) >= 1 && user_is_authenticated === true) {
-                    previous_log_save_time = parseInt(currentTime / 60)
+                // storing tutorial video progress when the minute changes, as compared to the previous log save time.
+                if ((Math.abs(parseInt(currentTime / 60) - previous_log_save_time) >= 1) && user_is_authenticated === true) {
+
+                    previous_log_save_time = parseInt(currentTime / 60);
 
                     tutorial_progress_data = {
                         username: "{{ user }}",
@@ -865,18 +832,14 @@
                             type: "POST",
                             url: "http://127.0.0.1:8001/logs_api/save_tutorial_progress/",
                             data: tutorial_progress_data,
-                            // beforeSend: function(xhr, settings) {
-                            //     if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
-                            //         xhr.setRequestHeader("X-CSRFToken", csrftoken);
-                            //     }
-                            // },
+                            
                             success: function(response) {
 
                                 // the tutorial progress log was successfully saved. 
                                 console.log("Success");
                                 
                                 // check if tutorial is marked as completed
-                                if ( allow_completion_change && ($('#completed').text() != "Completed"))
+                                if ( allow_completion_change && ($('#completed').text() != "Completed") )
                                 {
                                     $.ajax({
                                         type: "POST",
@@ -904,7 +867,7 @@
                                             });
                                         },
                                         error: function(xhr, status, err) {
-                                            
+                                            // the tutorial is not yet completed
                                         }
                                     });
                                 }

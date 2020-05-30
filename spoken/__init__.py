@@ -6,8 +6,9 @@ from .celery import app as celery_app
 __all__ = ('celery_app',)
 
 
-import redis
 # Initialize redis client
+import redis
+
 REDIS_CLIENT = redis.Redis(
     host='localhost',
     port=6379,
@@ -19,9 +20,3 @@ REDIS_CLIENT = redis.Redis(
 from pymongo import MongoClient
 
 MONGO_CLIENT = MongoClient()
-
-
-# initializing the GeoIP2 client
-from django.contrib.gis.geoip2 import GeoIP2
-
-GEOIP2_CLIENT = GeoIP2()

@@ -182,24 +182,57 @@ function getCookie(name) {
     return null;
 }
 
-let datetime, url_name, title, referer, visited_by, method, first_time_visit, ip_address;
-let country, region, city, latitude, longitude, report, device_type;
+
+// Adding event listeners to all links on the page, to track exit link activity.
+let links = document.getElementsByTagName('a')
+let exit_link_clicked;
+let exit_link_page;
+
+for (let i = 0; i < links.length; i++) {
+
+    links[i].addEventListener('click', function(event) {
+
+        exit_link_clicked = this.href;
+        let hostname = (new URL(exit_link_clicked)).hostname;
+
+        // a link is considered as an exit link if it points
+        // to a URL with a different hostname.
+        if (hostname != window.location.hostname)
+        {
+            exit_link_page = document.title;
+
+            $.ajax({
+                type: "POST",
+                url: "http://192.168.100.6:8001/logs_api/save_exit_info/",
+                data: {
+                    datetime: datetime,
+                    exit_link_clicked: exit_link_clicked,
+                    exit_link_page: exit_link_page
+                },
+            });
+        }
+
+        // return true;
+
+    });
+};
+
 
 // Extracting user data info, AFTER the DOM has fully loaded.
 $(document).ready(function () {
 
-    url_name = window.location.href;
-    title = document.title;
+    let url_name = window.location.href;
+    let title = document.title;
 
-    referer = document.referer;
+    let referer = document.referer;
 
-    visited_by = user;  // check base.html, the variable 'user' is defined there.
+    let visited_by = user;  // check base.html, the variable 'user' is defined there.
 
-    method = "GET";
+    let method = "GET";
 
-    datetime = new Date().getTime();
+    let datetime = new Date().getTime();
 
-    first_time_visit = true;
+    let first_time_visit = true;
 
     if (getCookie('visited_before'))
         first_time_visit = false;
@@ -208,13 +241,13 @@ $(document).ready(function () {
 
     // using geoplugin for IP details and geolocation 
 
-    ip_address = "";
+    let ip_address = "";
 
-    country = "";
-    region = "";
-    city = "";
-    latitude = "";
-    longitude = "";
+    let country = "";
+    let region = "";
+    let city = "";
+    let latitude = "";
+    let longitude = "";
 
     // Alternatively, can use ipinfo
     // jQuery.get("http://ipinfo.io", function(response) {
@@ -226,9 +259,9 @@ $(document).ready(function () {
 
     // fetch('http://www.geoplugin.net/json.gp').then(r=> r.json().then(j=> console.log(j)));
     
-    report = browserReportSync();
+    let report = browserReportSync();
 
-    device_type = deviceDetector.device;
+    let device_type = deviceDetector.device;
 
     $.get('https://freegeoip.app/json/', function(data) {
 
@@ -248,18 +281,6 @@ $(document).ready(function () {
     //     },
     // });
 
-});
-
-let unloaded = false;
-
-$(window).on('beforeunload', function() {
-
-    if (unloaded)
-        return;
-    unloaded = true;
- 
-    let visit_duration = Math.round((new Date().getTime() - datetime) / 1000);
-    
     $.ajax({
         type: "POST",
         url: "http://192.168.100.6:8001/logs_api/save_js_log/",
@@ -282,49 +303,7 @@ $(window).on('beforeunload', function() {
             city: city,
             latitude: latitude,
             longitude: longitude,
-            visit_duration: visit_duration,
             device_type: device_type
         },
     });
-
-    
-});
-
-window.addEventListener("visibilitychange", function(e)
-{
-    if (document.visibilityState == 'hidden')
-    {
-        if (device_type == 'desktop' || unloaded)
-            return;
-        unloaded = true;
-        
-        let visit_duration = Math.round((new Date().getTime() - datetime) / 1000);
-        
-        $.ajax({
-            type: "POST",
-            url: "http://192.168.100.6:8001/logs_api/save_js_log/",
-            data: {
-                url_name: url_name,
-                title: title,
-                method: method,
-                event_name: document.title,
-                visited_by: visited_by,
-                referer: referer,
-                os_family: report.os.name,
-                os_version: report.os.version,
-                browser_family: report.browser.name,
-                browser_version: report.browser.version,
-                ip_address: ip_address,
-                datetime: datetime,
-                first_time_visit: first_time_visit,
-                country: country,
-                region: region,
-                city: city,
-                latitude: latitude,
-                longitude: longitude,
-                visit_duration: visit_duration,
-                device_type: device_type
-            },
-        });
-    }
 });

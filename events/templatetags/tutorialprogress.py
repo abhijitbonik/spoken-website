@@ -1,3 +1,6 @@
+# Template tag used in watch_tutorial.html and tutorial_search.html.
+# Used to check if item is in dict or not.
+
 from django import template
 
 register = template.Library()
