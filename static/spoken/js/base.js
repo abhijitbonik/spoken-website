@@ -188,13 +188,15 @@ let links = document.getElementsByTagName('a')
 let exit_link_clicked;
 let exit_link_page;
 
-for(let i = 0; i < links.length; i++) {
+for (let i = 0; i < links.length; i++) {
 
     links[i].addEventListener('click', function(event) {
 
         exit_link_clicked = this.href;
         let hostname = (new URL(exit_link_clicked)).hostname;
-
+        
+        // a link is considered as an exit link if it points
+        // to a URL with a different hostname.
         if (hostname != window.location.hostname)
         {
             exit_link_page = document.title;

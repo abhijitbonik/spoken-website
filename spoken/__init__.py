@@ -6,8 +6,9 @@ from .celery import app as celery_app
 __all__ = ('celery_app',)
 
 
-import redis
 # Initialize redis client
+import redis
+
 REDIS_CLIENT = redis.Redis(
     host='localhost',
     port=6379,

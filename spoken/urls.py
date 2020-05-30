@@ -126,9 +126,6 @@ urlpatterns = [
     # url(r'^events2/', include('events2.urls', namespace='events2')),
     url(r'^cron/', include('cron.urls', namespace='cron')),
 
-    # logs
-    url(r'^logs/', include('logs.urls', namespace='logs')),
-    
     # cms
     url(r'^', include('cms.urls', namespace='cms')),
     

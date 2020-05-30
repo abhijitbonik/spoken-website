@@ -347,7 +347,8 @@ MIDDLEWARE = [
     'django_user_agents.middleware.UserAgentMiddleware',
 ]
 
-GEOIP_PATH  = BASE_DIR + '/geodb/'
+GEOIP_PATH  = MEDIA_ROOT + 'geodb/'
+
 CORS_ORIGIN_ALLOW_ALL = True
 
 CACHES = {
