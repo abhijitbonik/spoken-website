@@ -1,8 +1,9 @@
 
-
 import re
 import datetime
 import requests
+
+from .urls_to_events import EVENT_NAME_DICT
 
 
 class Logs:
