@@ -573,7 +573,7 @@
                 {
                     $.ajax({
                         type: "POST",
-                        url: "http://127.0.0.1:8001/logs_api/change_completion/",
+                        url: "http://192.168.100.6:8001/logs_api/change_completion/",
                         data: {
                             username: "{{ user }}",
                             completed: true,
@@ -613,7 +613,7 @@
                 {
                     $.ajax({
                         type: "POST",
-                        url: "http://127.0.0.1:8001/logs_api/change_completion/",
+                        url: "http://192.168.100.6:8001/logs_api/change_completion/",
                         data: { 
                             username: "{{ user }}",
                             completed: false,
@@ -830,7 +830,7 @@
                     
                     $.ajax({
                             type: "POST",
-                            url: "http://127.0.0.1:8001/logs_api/save_tutorial_progress/",
+                            url: "http://192.168.100.6:8001/logs_api/save_tutorial_progress/",
                             data: tutorial_progress_data,
                             
                             success: function(response) {
@@ -843,7 +843,7 @@
                                 {
                                     $.ajax({
                                         type: "POST",
-                                        url: "http://127.0.0.1:8001/logs_api/check_completion/",
+                                        url: "http://192.168.100.6:8001/logs_api/check_completion/",
                                         data: {
                                             username: "{{ user }}",
                                             foss: "{{ tr_rec.tutorial_detail.foss.foss }}",
