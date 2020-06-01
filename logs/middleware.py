@@ -4,7 +4,7 @@ import datetime
 import requests
 
 from .urls_to_events import EVENT_NAME_DICT
-
+from django.conf import settings
 
 class Logs:
 
@@ -16,9 +16,15 @@ class Logs:
         return self.get_response(request)
 
     def process_view(self, request, view_func, view_args, view_kwargs):
+
+        # get event name and log data for given URL
+
         try:
+
             for key in EVENT_NAME_DICT.keys():
+
                 if re.match(key, request.META['PATH_INFO']):
+
                     data = {}
                     data['path_info'] = request.META['PATH_INFO']
                     data['browser_info'] = request.META['HTTP_USER_AGENT']
@@ -29,7 +35,6 @@ class Logs:
                     data['datetime'] = str(datetime.datetime.now())
                     data['view_args'] = view_args
                     data['view_kwargs'] = view_kwargs
-                    data['request'] = request.body
                     data['referer'] = request.META.get('HTTP_REFERER', '(No referring link)')
 
                     # device details
@@ -48,17 +53,18 @@ class Logs:
                     if request.user_agent.is_tablet:
                         data['device_type'] = 'Tablet'
 
-                    if request.user_agent.is_pc:
+                    elif request.user_agent.is_pc:
                         data['device_type'] = 'PC'
 
-                    if request.user_agent.is_mobile:
+                    elif request.user_agent.is_mobile:
                         data['device_type'] = 'Mobile'
 
-                    if request.user_agent.is_bot:
+                    elif request.user_agent.is_bot:
                         data['device_type'] = 'Search Engine Crawler/Spider'
 
                     if 'has_visited' in request.session:
                         data['first_time_visit'] = False
+
                     else:
                         data['first_time_visit'] = True
                         request.session['has_visited'] = True
@@ -68,10 +74,9 @@ class Logs:
                     if request.method == "POST":
 
                         # Note that request.POST can contain multiple items for each key. 
-                        # If you are expecting multiple items for each key, you can use lists, 
-                        # which returns all values as a list.
                         for key, values in request.POST.lists():
 
+                            # Avoid storing sensitive data.
                             if key != 'csrfmiddlewaretoken' and key != 'password':
                                 
                                 if len(values) == 1:
@@ -81,8 +86,11 @@ class Logs:
                                     data[key] = values
 
                     try:
+
+                        save_middleware_log_url = settings.ANALYTICS_SYSTEM_URL + 'logs_api/save_middleware_log/'
+                        
                         # set a very small timeout for the HTTP request, to simulate asynchronous behaviour.
-                        requests.post("http://192.168.100.6:8001/logs_api/save_middleware_log/", data=data, timeout=0.0000000001)
+                        requests.post(save_middleware_log_url, data=data, timeout=0.0000000001)
                     
                     except requests.exceptions.ReadTimeout: 
                         pass

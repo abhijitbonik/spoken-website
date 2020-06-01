@@ -162,19 +162,19 @@ def tutorial_search(request):
             if foss_get and language_get:
 
                 collection = queryset.filter(tutorial_detail__foss__foss=foss_get, language__name=language_get).order_by('tutorial_detail__level', 'tutorial_detail__order')
-                
+
                 # If the user has selected both, the FOSS and the language on the tutorial search page,
                 # then we extract the required data for showing course completion percentage and
                 # completion/non-completion status for each tutorial of that FOSS in that language.
                 total_tutorials = collection.count()
 
-                log = tutorial_progress_logs.find_one({ "username" : str(request.user.username) })
-                
+                log = tutorial_progress_logs.find_one({"username": str(request.user.username)})
+
                 # If a log exists for the given user in the MongoDB
                 if log:
 
                     # Extract the relevant fields corresponding to the given user's
-                    # progress in the given FOSS, in the given language. 
+                    # progress in the given FOSS, in the given language.
                     try:
 
                         foss_log = log['fosses'][str(collection[0].tutorial_detail.foss.id)]
@@ -186,15 +186,15 @@ def tutorial_search(request):
 
                             if key != 'last_watched_tut_url' and details["completed"]:
                                 completed_tutorial_dict[str(key)] = True
-                    
+
                     except Exception:
                         # If the required record doesn't exist, an exception will be thrown above
-                        # Do nothing. 
+                        # Do nothing.
                         pass
 
                 # Calculate FOSS completion percentage.
                 try:
-                    context['completion_percentage'] = int ( (len(completed_tutorial_dict) / total_tutorials) * 100)
+                    context['completion_percentage'] = int((len(completed_tutorial_dict) / total_tutorials) * 100)
                 except ZeroDivisionError:  # if by any chance the FOSS has 0 tutorials in it
                     context['completion_percentage'] = 0
 
@@ -218,7 +218,7 @@ def tutorial_search(request):
     context['current_lang'] = language_get
 
     context['completed_tutorial_dict'] = completed_tutorial_dict
-        
+
     return render(request, 'spoken/templates/tutorial_search.html', context)
 
 def list_videos(request):
@@ -345,17 +345,17 @@ def watch_tutorial(request, foss, tutorial, lang):
             'tutorial_detail__foss__foss', 'tutorial_detail__level', 'tutorial_detail__order', 'language__name')
         questions = Question.objects.filter(category=td_rec.foss.foss.replace(
             ' ', '-'), tutorial=td_rec.tutorial.replace(' ', '-')).order_by('-date_created')
-        
+
         start_time = 0  # the timestamp at which the tutorial video should start playing
         language_visit_count = 1  # number of times the user has visited the
-                                  # given tutorial of the given FOSS in the given language.
+        # given tutorial of the given FOSS in the given language.
         completed = False
         completed_tutorial_dict = {}  # for displaying competion/non-completion status in the playlist.
-        
+
         try:
             if request.user.is_authenticated:
 
-                user = tutorial_progress_logs.find_one({ "username": str(request.user.username) })
+                user = tutorial_progress_logs.find_one({"username": str(request.user.username)})
 
                 # foss_name = str(tr_rec.tutorial_detail.foss.foss)
                 # tutorial_name = str(tr_rec.tutorial_detail.tutorial)
@@ -377,15 +377,15 @@ def watch_tutorial(request, foss, tutorial, lang):
                 # defining the fields for creation/update in MongoDB.
                 language_visit_count_field = 'fosses.' + str(foss_id) + '.' + str(language_id) + '.' + str(tutorial_id) + '.visit_count'
                 visits_field = 'fosses.' + str(foss_id) + '.' + str(language_id) + '.' + str(tutorial_id) + '.visits'
-                visit_number_field = visits_field + '.' + str (language_visit_count)
+                visit_number_field = visits_field + '.' + str(language_visit_count)
                 last_watched_tut_url_field = 'fosses.' + str(foss_id) + '.' + str(language_id) + '.last_watched_tut_url'
-                
-                last_watched_tut_url =  '/watch/' + foss_partial_url + '/' + tutorial_partial_url + '/' + lang
-                
+
+                last_watched_tut_url = '/watch/' + foss_partial_url + '/' + tutorial_partial_url + '/' + lang
+
                 # update the visit count, last watched tutorial
                 tutorial_progress_logs.find_one_and_update(
-                    { "username" : str(request.user.username) }, 
-                    { "$set" : { visit_number_field: {}, language_visit_count_field: language_visit_count, last_watched_tut_url_field: last_watched_tut_url } },
+                    {"username": str(request.user.username)},
+                    {"$set": {visit_number_field: {}, language_visit_count_field: language_visit_count, last_watched_tut_url_field: last_watched_tut_url}},
                     upsert=True
                 )
 
@@ -397,19 +397,15 @@ def watch_tutorial(request, foss, tutorial, lang):
                             completed_tutorial_dict[tut_id] = True
                     except:
                         pass
-        
+
                 start_time = user['fosses'][foss_id][language_id][tutorial_id]['curr_time'] * 60
 
                 if user['fosses'][foss_id][language_id][tutorial_id]['completed']:
                     completed = True
 
-
-
         except Exception as e:  # the user, if authenticated, has not viewed that tutorial previously.
                                 # leave the start time as 0 and visit count as 1 in this case
             pass
-
-        
 
     except Exception as e:
         messages.error(request, str(e))
@@ -418,15 +414,13 @@ def watch_tutorial(request, foss, tutorial, lang):
         str(tr_rec.tutorial_detail.foss_id) + "/" + str(tr_rec.tutorial_detail_id) + "/" + tr_rec.video
     video_info = get_video_info(video_path)
 
-
-
     context = {
         'tr_rec': tr_rec,
         'tr_recs': tr_recs,
         'questions': questions,
         'video_info': video_info,
         'start_time': start_time,
-        'language_visit_count': str (language_visit_count),
+        'language_visit_count': str(language_visit_count),
         'completed': completed,
         'tutorial_id': td_rec.id,
         'completed_tutorial_dict': completed_tutorial_dict,
