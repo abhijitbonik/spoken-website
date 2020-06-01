@@ -221,6 +221,12 @@ for (let i = 0; i < links.length; i++) {
 // Extracting user data info, AFTER the DOM has fully loaded.
 $(document).ready(function () {
 
+    let latitude, longitude;
+    let country = "";
+    let region = "";
+    let city = "";
+    let ip_address = "";
+
     let url_name = window.location.href;
     let title = document.title;
 
@@ -241,14 +247,6 @@ $(document).ready(function () {
 
     // using geoplugin for IP details and geolocation 
 
-    let ip_address = "";
-
-    let country = "";
-    let region = "";
-    let city = "";
-    let latitude = "";
-    let longitude = "";
-
     // Alternatively, can use ipinfo
     // jQuery.get("http://ipinfo.io", function(response) {
     //     // country = response.country
@@ -263,16 +261,6 @@ $(document).ready(function () {
 
     let device_type = deviceDetector.device;
 
-    $.get('https://freegeoip.app/json/', function(data) {
-
-        ip_address = data.ip;
-        country = data.country_name;
-        region = data.region_name;
-        city = data.city;
-        latitude = data.latitude;
-        longitude = data.longitude;
-    });
-
     // $.ajax({
     //     type: "GET",
     //     url: "https://freegeoip.app/json/",
@@ -281,29 +269,83 @@ $(document).ready(function () {
     //     },
     // });
 
-    $.ajax({
-        type: "POST",
-        url: "http://192.168.100.6:8001/logs_api/save_js_log/",
-        data: {
-            url_name: url_name,
-            title: title,
-            method: method,
-            event_name: document.title,
-            visited_by: visited_by,
-            referer: referer,
-            os_family: report.os.name,
-            os_version: report.os.version,
-            browser_family: report.browser.name,
-            browser_version: report.browser.version,
-            ip_address: ip_address,
-            datetime: datetime,
-            first_time_visit: first_time_visit,
-            country: country,
-            region: region,
-            city: city,
-            latitude: latitude,
-            longitude: longitude,
-            device_type: device_type
-        },
-    });
+    let options = {
+        enableHighAccuracy: true,
+        timeout: 3000,  // wait 3 seconds to get high accuracy data. If 3 second window expires, go back to normal accuracy.
+        maximumAge: 0  // maximum age in milliseconds of a possible cached position that is acceptable to return. If set to 0, it means that the device cannot use a cached position and must attempt to retrieve the real current position.
+    };
+
+    function success(position) {
+        latitude = position.coords.latitude;
+        longitude = position.coords.longitude;
+        console.log (latitude)
+        console.log (longitude)
+        $.ajax({
+            type: "POST",
+            url: "http://192.168.100.6:8001/logs_api/save_js_log/",
+            data: {
+                url_name: url_name,
+                title: title,
+                method: method,
+                event_name: document.title,
+                visited_by: visited_by,
+                referer: referer,
+                os_family: report.os.name,
+                os_version: report.os.version,
+                browser_family: report.browser.name,
+                browser_version: report.browser.version,
+                ip_address: ip_address,
+                datetime: datetime,
+                first_time_visit: first_time_visit,
+                country: country,
+                region: region,
+                city: city,
+                latitude: latitude,
+                longitude: longitude,
+                device_type: device_type
+            },
+        });
+    };
+
+    function error(err) {
+        
+        // Perform IP based geolocation using external API.
+
+        $.get('https://freegeoip.app/json/', function(data) {
+            country = data.country_name;
+            region = data.region_name;
+            city = data.city;
+            latitude = data.latitude;
+            longitude = data.longitude;
+
+            $.ajax({
+                type: "POST",
+                url: "http://192.168.100.6:8001/logs_api/save_js_log/",
+                data: {
+                    url_name: url_name,
+                    title: title,
+                    method: method,
+                    event_name: document.title,
+                    visited_by: visited_by,
+                    referer: referer,
+                    os_family: report.os.name,
+                    os_version: report.os.version,
+                    browser_family: report.browser.name,
+                    browser_version: report.browser.version,
+                    ip_address: ip_address,
+                    datetime: datetime,
+                    first_time_visit: first_time_visit,
+                    country: country,
+                    region: region,
+                    city: city,
+                    latitude: latitude,
+                    longitude: longitude,
+                    device_type: device_type
+                },
+            });
+        });
+    }
+
+    navigator.geolocation.getCurrentPosition(success, error, options);
+
 });
