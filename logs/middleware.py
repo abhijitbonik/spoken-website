@@ -27,15 +27,15 @@ class Logs:
 
                     data = {}
                     data['path_info'] = request.META['PATH_INFO']
-                    data['browser_info'] = request.META['HTTP_USER_AGENT']
                     data['event_name'] = EVENT_NAME_DICT[key]['name']
-                    data['visited_by'] = request.user.username if request.user.is_authenticated else 'anonymous'
+                    data['visited_by'] = request.user.username if request.user.is_authenticated else 'AnonymousUser'
                     data['ip_address'] = request.META['REMOTE_ADDR']
                     data['method'] = request.method
                     data['datetime'] = str(datetime.datetime.now())
                     data['view_args'] = view_args
                     data['view_kwargs'] = view_kwargs
                     data['referer'] = request.META.get('HTTP_REFERER', '(No referring link)')
+                    data['page_title'] = ""
 
                     # device details
                     data['browser_family'] = request.user_agent.browser.family
@@ -44,7 +44,7 @@ class Logs:
                     data['os_family'] = request.user_agent.os.family
                     data['os_version'] = request.user_agent.os.version_string
 
-                    data['device_family'] = request.user_agent.device.family
+                    # data['device_family'] = request.user_agent.device.family
                     data['device_type'] = 'Unknown'
 
                     if request.user_agent.is_mobile:
@@ -63,10 +63,10 @@ class Logs:
                         data['device_type'] = 'Search Engine Crawler/Spider'
 
                     if 'has_visited' in request.session:
-                        data['first_time_visit'] = False
+                        data['first_time_visit'] = "false"
 
                     else:
-                        data['first_time_visit'] = True
+                        data['first_time_visit'] = "true"
                         request.session['has_visited'] = True
                     
                     request.session.set_expiry(15552000)  # 6 months, in seconds
