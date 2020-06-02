@@ -221,16 +221,23 @@ for (let i = 0; i < links.length; i++) {
 // Extracting user data info, AFTER the DOM has fully loaded.
 $(document).ready(function () {
 
-    let latitude, longitude;
+    let latitude = "", longitude = "";
     let country = "";
     let region = "";
     let city = "";
     let ip_address = "";
 
     let path_info = window.location.pathname;
+    if (path_info == null)
+        path_info = "";  // to ensure that none of the fields are null
+
     let page_title = document.title;
+    if (page_title == null)
+        page_title = '(No page title)';
 
     let referer = document.referer;
+    if (referer == null)
+        referer = '(No referring link)';
 
     let visited_by = user;  // check base.html, the variable 'user' is defined there.
 
@@ -261,14 +268,6 @@ $(document).ready(function () {
     let report = browserReportSync();
 
     let device_type = deviceDetector.device;
-
-    // Assigning different names to ensure consistency
-    if (device_type == "tablet")
-        device_type = "Tablet";
-    else if (device_type == "desktop")
-        device_type = "PC";
-    else if (device_type == "phone")
-        device_type = "Mobile";
 
     // $.ajax({
     //     type: "GET",

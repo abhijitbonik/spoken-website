@@ -96,7 +96,6 @@ INSTALLED_APPS = [
     'corsheaders',
     'ckeditor',
     'cron',
-    'logs',
 ]
 
 
