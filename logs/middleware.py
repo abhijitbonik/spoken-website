@@ -32,8 +32,8 @@ class Logs:
                     data['ip_address'] = request.META['REMOTE_ADDR']
                     data['method'] = request.method
                     data['datetime'] = str(datetime.datetime.now())
-                    data['view_args'] = view_args
-                    data['view_kwargs'] = view_kwargs
+                    data['view_args'] = view_args if view_args else []
+                    data['view_kwargs'] = view_kwargs if view_kwargs else {}
                     data['referer'] = request.META.get('HTTP_REFERER', '(No referring link)')
                     data['page_title'] = ""
 
@@ -44,7 +44,7 @@ class Logs:
                     data['os_family'] = request.user_agent.os.family
                     data['os_version'] = request.user_agent.os.version_string
 
-                    # data['device_family'] = request.user_agent.device.family
+                    data['device_family'] = request.user_agent.device.family
                     data['device_type'] = 'Unknown'
 
                     if request.user_agent.is_mobile:
