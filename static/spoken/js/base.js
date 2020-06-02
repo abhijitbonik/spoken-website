@@ -193,6 +193,10 @@ for (let i = 0; i < links.length; i++) {
     links[i].addEventListener('click', function(event) {
 
         exit_link_clicked = this.href;
+        let x = new Date();
+
+        let datetime = (x.getTime() + x.getTimezoneOffset() * 60 * 1000); // UTC timezone timestamp
+        
         let hostname = (new URL(exit_link_clicked)).hostname;
 
         // a link is considered as an exit link if it points
@@ -221,6 +225,9 @@ for (let i = 0; i < links.length; i++) {
 // Extracting user data info, AFTER the DOM has fully loaded.
 $(document).ready(function () {
 
+    let x = new Date();
+    let datetime = (x.getTime() + x.getTimezoneOffset() * 60 * 1000); // UTC timestamp
+
     let latitude = "", longitude = "";
     let country = "";
     let region = "";
@@ -243,8 +250,6 @@ $(document).ready(function () {
 
     let method = "GET";
     let event_name = "";
-
-    let datetime = new Date().getTime();
 
     let first_time_visit = true;
 
@@ -269,9 +274,6 @@ $(document).ready(function () {
 
     let device_type = deviceDetector.device;
     let device_family = "";
-
-    let view_args = [];
-    let view_kwargs = {};
 
     // $.ajax({
     //     type: "GET",
@@ -318,8 +320,6 @@ $(document).ready(function () {
                     longitude: longitude,
                     device_type: device_type,
                     device_family: device_family,
-                    view_args: view_args,
-                    view_kwargs: view_kwargs,
                     event_name: event_name
                 },
             });
@@ -365,8 +365,6 @@ $(document).ready(function () {
                     longitude: longitude,
                     device_type: device_type,
                     device_family: device_family,
-                    view_args: view_args,
-                    view_kwargs: view_kwargs,
                     event_name: event_name
                 },
             });
