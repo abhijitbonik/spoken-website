@@ -235,9 +235,9 @@ $(document).ready(function () {
     if (page_title == null)
         page_title = '(No page title)';
 
-    let referer = document.referer;
-    if (referer == null)
-        referer = '(No referring link)';
+    let referrer = document.referer;
+    if (referrer == null || referrer == "")
+        referrer = '(No referring link)';
 
     let visited_by = user;  // check base.html, the variable 'user' is defined there.
 
@@ -268,6 +268,10 @@ $(document).ready(function () {
     let report = browserReportSync();
 
     let device_type = deviceDetector.device;
+    let device_family = "";
+
+    let view_args = [];
+    let view_kwargs = {};
 
     // $.ajax({
     //     type: "GET",
@@ -299,7 +303,7 @@ $(document).ready(function () {
                     method: method,
                     event_name: document.title,
                     visited_by: visited_by,
-                    referer: referer,
+                    referrer: referrer,
                     os_family: report.os.name,
                     os_version: report.os.version,
                     browser_family: report.browser.name,
@@ -313,6 +317,9 @@ $(document).ready(function () {
                     latitude: latitude,
                     longitude: longitude,
                     device_type: device_type,
+                    device_family: device_family,
+                    view_args: view_args,
+                    view_kwargs: view_kwargs,
                     event_name: event_name
                 },
             });
@@ -343,7 +350,7 @@ $(document).ready(function () {
                     method: method,
                     event_name: document.title,
                     visited_by: visited_by,
-                    referer: referer,
+                    referrer: referrer,
                     os_family: report.os.name,
                     os_version: report.os.version,
                     browser_family: report.browser.name,
@@ -357,6 +364,9 @@ $(document).ready(function () {
                     latitude: latitude,
                     longitude: longitude,
                     device_type: device_type,
+                    device_family: device_family,
+                    view_args: view_args,
+                    view_kwargs: view_kwargs,
                     event_name: event_name
                 },
             });
