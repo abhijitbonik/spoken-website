@@ -207,7 +207,7 @@ for (let i = 0; i < links.length; i++) {
 
             $.ajax({
                 type: "POST",
-                url: "http://192.168.100.6:8001/logs_api/save_exit_info/",
+                url: logs_api_url + "logs_api/save_exit_info/",
                 data: {
                     datetime: datetime,
                     exit_link_clicked: exit_link_clicked,
@@ -275,7 +275,7 @@ $(document).ready(function () {
 
         $.ajax({
             type: "POST",
-            url: "http://127.0.0.1:8001/logs_api/save_js_log/",
+            url: logs_api_url + "logs_api/save_js_log/",
             data: {
                 path_info: path_info,
                 page_title: page_title,
@@ -320,7 +320,7 @@ $(document).ready(function () {
 
             $.ajax({
                 type: "POST",
-                url: "http://127.0.0.1:8001/logs_api/save_js_log/",
+                url: logs_api_url + "logs_api/save_js_log/",
                 data: {
                     path_info: path_info,
                     page_title: page_title,

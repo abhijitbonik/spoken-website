@@ -113,7 +113,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'logs.context_processors.ip_address_processor',
+                'logs.context_processors.logs_processor',
             ],
         },
     },
@@ -371,6 +371,4 @@ ANALYTICS_DATA = ''
 
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False  # required for checking returning visits
 
-SAVE_LOGS_WITH_CELERY = True
-
-MONGO_BULK_INSERT_COUNT = 1000
+LOGS_API_URL = 'http://192.168.100.6:8001/'
