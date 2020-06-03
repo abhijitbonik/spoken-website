@@ -84,6 +84,10 @@ EVENT_NAME_DICT={
         'name' : 'event.statistics.academic.center'
     },
 
+    r'^/jobs/$' : {
+        'name' : 'event.statistics.jobs'
+    },
+
     r'^/media/cdimage/': {
         'name' : 'event.media.cdimage'
     },

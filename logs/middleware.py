@@ -2,6 +2,7 @@
 import re
 import datetime
 import requests
+import json
 
 from .urls_to_events import EVENT_NAME_DICT
 from django.conf import settings
@@ -31,7 +32,7 @@ class Logs:
                     data['visited_by'] = request.user.username if request.user.is_authenticated else 'AnonymousUser'
                     data['ip_address'] = request.META['REMOTE_ADDR']
                     data['method'] = request.method
-                    data['datetime'] = str(datetime.datetime.now())
+                    data['datetime'] = str(datetime.datetime.utcnow())
                     data['view_args'] = view_args if view_args else []
                     data['view_kwargs'] = view_kwargs if view_kwargs else {}
                     data['referer'] = request.META.get('HTTP_REFERER', '(No referring link)')
@@ -73,6 +74,8 @@ class Logs:
 
                     if request.method == "POST":
 
+                        data['post_data'] = {}
+
                         # Note that request.POST can contain multiple items for each key. 
                         for key, values in request.POST.lists():
 
@@ -80,10 +83,12 @@ class Logs:
                             if key != 'csrfmiddlewaretoken' and key != 'password':
                                 
                                 if len(values) == 1:
-                                    data[key] = values[0]
+                                    data['post_data'][key] = values[0]
 
                                 else:
-                                    data[key] = values
+                                    data['post_data'][key] = values
+                        
+                        data['post_data'] = json.dumps(data['post_data'])
 
                     try:
 
