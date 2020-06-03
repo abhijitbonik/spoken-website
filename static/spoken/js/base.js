@@ -232,7 +232,7 @@ $(document).ready(function () {
     let country = "";
     let region = "";
     let city = "";
-    let ip_address = "";
+    let ip_address = logs_user_ip;  // 'logs_user_ip' variable defined in base.html
 
     let path_info = window.location.pathname;
     if (path_info == null)
@@ -246,7 +246,7 @@ $(document).ready(function () {
     if (referrer == null || referrer == "")
         referrer = '(No referring link)';
 
-    let visited_by = user;  // check base.html, the variable 'user' is defined there.
+    let visited_by = logs_user_name;  // 'logs_user_name' variable defined in base.html
 
     let method = "GET";
     let event_name = "";
@@ -257,31 +257,11 @@ $(document).ready(function () {
         first_time_visit = false;
 
     setCookie('visited_before', true, 180);
-
-    // using geoplugin for IP details and geolocation 
-
-    // Alternatively, can use ipinfo
-    // jQuery.get("http://ipinfo.io", function(response) {
-    //     // country = response.country
-    //     // region = response.region
-    //     // city = response.city
-    //     console.log (response)
-    // }, "jsonp");
-
-    // fetch('http://www.geoplugin.net/json.gp').then(r=> r.json().then(j=> console.log(j)));
     
     let report = browserReportSync();
 
     let device_type = deviceDetector.device;
     let device_family = "";
-
-    // $.ajax({
-    //     type: "GET",
-    //     url: "https://freegeoip.app/json/",
-    //     success: function(response) {
-    //         console.log(response.country_name);
-    //     },
-    // });
 
     let options = {
         enableHighAccuracy: true,
@@ -293,36 +273,32 @@ $(document).ready(function () {
         latitude = position.coords.latitude;
         longitude = position.coords.longitude;
 
-        $.get('https://freegeoip.app/json/', function(data) {
-            ip_address = data.ip;
-
-            $.ajax({
-                type: "POST",
-                url: "http://192.168.100.6:8001/logs_api/save_js_log/",
-                data: {
-                    path_info: path_info,
-                    page_title: page_title,
-                    method: method,
-                    event_name: document.title,
-                    visited_by: visited_by,
-                    referrer: referrer,
-                    os_family: report.os.name,
-                    os_version: report.os.version,
-                    browser_family: report.browser.name,
-                    browser_version: report.browser.version,
-                    ip_address: ip_address,
-                    datetime: datetime,
-                    first_time_visit: first_time_visit,
-                    country: country,
-                    region: region,
-                    city: city,
-                    latitude: latitude,
-                    longitude: longitude,
-                    device_type: device_type,
-                    device_family: device_family,
-                    event_name: event_name
-                },
-            });
+        $.ajax({
+            type: "POST",
+            url: "http://127.0.0.1:8001/logs_api/save_js_log/",
+            data: {
+                path_info: path_info,
+                page_title: page_title,
+                method: method,
+                event_name: document.title,
+                visited_by: visited_by,
+                referrer: referrer,
+                os_family: report.os.name,
+                os_version: report.os.version,
+                browser_family: report.browser.name,
+                browser_version: report.browser.version,
+                ip_address: ip_address,
+                datetime: datetime,
+                first_time_visit: first_time_visit,
+                country: country,
+                region: region,
+                city: city,
+                latitude: latitude,
+                longitude: longitude,
+                device_type: device_type,
+                device_family: device_family,
+                event_name: event_name
+            },
         });
     };
 
@@ -332,9 +308,10 @@ $(document).ready(function () {
         let ips = ["15.194.44.177", "129.33.168.145", '46.228.130.180', '195.13.190.53', '146.235.167.153', '103.79.252.4', '67.231.228.190', '146.235.167.157', '88.89.235.241', '27.67.134.159','117.217.149.25', '202.134.153.244', '117.221.232.65', '115.96.110.248', '182.74.35.216', '27.61.140.192','202.83.21.148', '182.65.60.225', '106.77.155.162', '101.214.104.169', '103.120.153.54', '106.51.109.154', '1.23.123.14', '175.100.139.82', '203.199.208.90', '112.196.179.251', '103.53.42.104', '122.168.117.86']
         ip_address = ips[Math.floor(Math.random() * ips.length)];
         
+        // In case we do not want to use an External API, we can do IP-based
+        // Geolocation with GeoIP2, on the server side.
         $.get('https://freegeoip.app/json/' + ip_address, function(data) {
             
-            ip_address = data.ip;
             country = data.country_name;
             region = data.region_name;
             city = data.city;
@@ -343,7 +320,7 @@ $(document).ready(function () {
 
             $.ajax({
                 type: "POST",
-                url: "http://192.168.100.6:8001/logs_api/save_js_log/",
+                url: "http://127.0.0.1:8001/logs_api/save_js_log/",
                 data: {
                     path_info: path_info,
                     page_title: page_title,

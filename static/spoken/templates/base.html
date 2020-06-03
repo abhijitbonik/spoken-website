@@ -400,7 +400,8 @@
         <script src="{% static 'spoken/js/jquery-1.11.0.min.js' %}"></script>
         <script src="{% static 'spoken/js/bootstrap.min.js' %}"></script>
         <script>
-            let user = "{{ user }}";  // for accessing the username in base.js
+            let logs_user_name = "{{ user }}";  // for accessing in base.js
+            let logs_user_ip = "{{ user_ip_address }}";
         </script>
         <script src="{% static 'spoken/js/browser-report.js' %}"></script>   <!-- Browser Report -->
         <script src="{% static 'spoken/js/devicedetector-min.js' %}"></script>

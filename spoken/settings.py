@@ -96,6 +96,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'ckeditor',
     'cron',
+    'logs',
 ]
 
 
@@ -112,6 +113,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'logs.context_processors.ip_address_processor',
             ],
         },
     },
