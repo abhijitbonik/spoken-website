@@ -305,9 +305,6 @@ $(document).ready(function () {
     function error(err) {
         
         // Perform IP based geolocation using external API.
-        let ips = ["15.194.44.177", "129.33.168.145", '46.228.130.180', '195.13.190.53', '146.235.167.153', '103.79.252.4', '67.231.228.190', '146.235.167.157', '88.89.235.241', '27.67.134.159','117.217.149.25', '202.134.153.244', '117.221.232.65', '115.96.110.248', '182.74.35.216', '27.61.140.192','202.83.21.148', '182.65.60.225', '106.77.155.162', '101.214.104.169', '103.120.153.54', '106.51.109.154', '1.23.123.14', '175.100.139.82', '203.199.208.90', '112.196.179.251', '103.53.42.104', '122.168.117.86']
-        ip_address = ips[Math.floor(Math.random() * ips.length)];
-        
         // In case we do not want to use an External API, we can do IP-based
         // Geolocation with GeoIP2, on the server side.
         $.get('https://freegeoip.app/json/' + ip_address, function(data) {
