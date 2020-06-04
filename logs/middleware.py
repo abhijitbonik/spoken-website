@@ -92,7 +92,7 @@ class Logs:
 
                     try:
 
-                        save_middleware_log_url = settings.ANALYTICS_SYSTEM_URL + 'logs_api/save_middleware_log/'
+                        save_middleware_log_url = settings.LOGS_API_URL + 'logs_api/save_middleware_log/'
                         
                         # set a very small timeout for the HTTP request, to simulate asynchronous behaviour.
                         requests.post(save_middleware_log_url, data=data, timeout=0.0000000001)

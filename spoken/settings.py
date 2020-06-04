@@ -389,4 +389,4 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = False  # required for checking returning visit
 
 SAVE_LOGS_WITH_CELERY = True  # whether to save website logs with celery, or in monitor_queue.py itself.
 
-ANALYTICS_SYSTEM_URL = 'http://192.168.100.6:8001/'
+LOGS_API_URL = 'http://192.168.100.6:8001/'
