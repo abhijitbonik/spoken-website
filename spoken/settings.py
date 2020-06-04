@@ -349,7 +349,7 @@ MIDDLEWARE = [
     'logs.middleware.Logs',
 ]
 
-GEOIP_PATH  = MEDIA_ROOT + '/geodb/'
+GEOIP_PATH  = MEDIA_ROOT + '/geodb/'  # currently GeoIP is not in use in this repository
 CORS_ORIGIN_ALLOW_ALL = True
 
 CACHES = {
@@ -386,7 +386,5 @@ CKEDITOR_CONFIGS = {
 ANALYTICS_DATA = ''
 
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False  # required for checking returning visits
-
-SAVE_LOGS_WITH_CELERY = True  # whether to save website logs with celery, or in monitor_queue.py itself.
 
 LOGS_API_URL = 'http://192.168.100.6:8001/'
