@@ -35,7 +35,7 @@ class Logs:
                     data['datetime'] = str(datetime.datetime.utcnow())
                     data['view_args'] = view_args if view_args else []
                     data['view_kwargs'] = view_kwargs if view_kwargs else {}
-                    data['referer'] = request.META.get('HTTP_REFERER', '(No referring link)')
+                    data['referrer'] = request.META.get('HTTP_REFERER', '(No referring link)')
                     data['page_title'] = ""
 
                     # device details
