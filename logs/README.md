@@ -12,4 +12,6 @@
 
 - Ensure that the [spoken-analytics-system](https://github.com/Spoken-tutorial/Spoken-Analytics-System/) Django server (which contains the Logs API), is running at the URL value assigned to LOGS_API_URL. Also ensure that the other setup mentioned in the analytics system repo (running the *monitor_queue.py* file, running Celery, etc.) is done. 
   
-- Report for the Spoken Tutorial Event Logging system can be found [here](https://www.notion.so/krithik/Fellowship-Report-509f52a54ee94a2e9b650d41f6c3235f) (Work in Progress)
+- Report for the Spoken Tutorial Event Logging system can be found [here](https://docs.google.com/document/d/1YXwQmeMuMrX0YKncGss35xBPszmqwgO2zt37Oj0-0Vk/)
+- Check the [README](/home/krithik/Desktop/Git/spoken-website/logs/README.md) of the Logs API of the Spoken-Analytics-System repo for more details.
+- Link to presentation video: https://drive.google.com/file/d/1MxgjGecnsIjRe7RS8GWwE61BneNbGoqU/view?usp=sharing
