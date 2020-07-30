@@ -96,6 +96,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'ckeditor',
     'cron',
+    'sso',
 ]
 
 
@@ -267,6 +268,7 @@ DATABASE_ROUTERS = [
 # Login using username or email address
 AUTHENTICATION_BACKENDS = (
     'cms.backends.EmailOrUsernameModelBackend',
+    'sso.backends.SSOBackend',
     'django.contrib.auth.backends.ModelBackend'
 )
 # Reports
@@ -328,7 +330,8 @@ MIDDLEWARE = [
     'django.middleware.common.BrokenLinkEmailsMiddleware',
     #'masquerade.middleware.MasqueradeMiddleware',
     'django.contrib.redirects.middleware.RedirectFallbackMiddleware',
-    'impersonate.middleware.ImpersonateMiddleware'
+    'impersonate.middleware.ImpersonateMiddleware',
+    'sso.middleware.SSO',
 ]
 
 CORS_ORIGIN_ALLOW_ALL = True
@@ -368,3 +371,4 @@ REST_FRAMEWORK = {
     ],
 }
 
+SAML_FOLDER = os.path.join(BASE_DIR, 'saml')
