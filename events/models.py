@@ -563,9 +563,7 @@ class StudentBatch(models.Model):
   department = models.ForeignKey(Department, on_delete=models.PROTECT )
   year = models.PositiveIntegerField() # 2010-2014
   stcount = models.PositiveIntegerField(default=0)
-
-  class Meta(object):
-    unique_together = ("academic", "year", "department")
+  batch_name = models.CharField(max_length=200, null=True)
 
   def __str__(self):
     return '%s, %s Batch' % (self.department.name, self.year)
@@ -601,6 +599,20 @@ class StudentBatch(models.Model):
     if self.trainingrequest_set.exists():
        return False
     return True
+
+  def create_batch_name(self):
+    batch_query = StudentBatch.objects.filter(department_id=self.department_id, year=self.year, organiser=self.organiser)
+    b_count = batch_query.count()
+    name =  str(self.department)+"-"+str(self.year)+"-"+str(b_count)
+
+    for a in range(b_count+1):
+      name =  str(self.department)+"-"+str(self.year)+"-"+str(a+1)
+    
+      if not batch_query.filter(batch_name=name).exists():
+        self.batch_name = name
+        self.save()
+        break
+    return name
 
 
 class StudentMaster(models.Model):
@@ -824,6 +836,8 @@ class TrainingRequest(models.Model):
   training_planner = models.ForeignKey(TrainingPlanner, on_delete=models.PROTECT )
   department = models.ForeignKey(Department, on_delete=models.PROTECT )
   sem_start_date = models.DateField()
+  training_start_date = models.DateField(default=datetime.now)
+  training_end_date = models.DateField(default=datetime.now)
   course = models.ForeignKey(CourseMap, on_delete=models.PROTECT )
   batch = models.ForeignKey(StudentBatch, null = True, on_delete=models.PROTECT )
   participants = models.PositiveIntegerField(default=0)
@@ -918,9 +932,7 @@ class TrainingRequest(models.Model):
     return '(%d / %d)' % (training_attend_count, student_master_count)
 
   def can_edit(self):
-    if self.status == 1 or TrainingAttend.objects.filter(
-      training_id=self.id
-    ).exists():
+    if self.status == 1 or TrainingAttend.objects.filter(training_id=self.id).exclude(training__department_id=169).exists():
       return False
     return True
 

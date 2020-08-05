@@ -56,6 +56,7 @@ from reportlab.lib.enums import TA_CENTER
 from PyPDF2 import PdfFileWriter, PdfFileReader
 from events.views import get_page
 from io import BytesIO
+from django.db.models import Q
 
 # import helpers
 from events.views import is_organiser, is_invigilator, is_resource_person, is_administrator, is_accountexecutive
@@ -235,31 +236,20 @@ class StudentBatchCreateView(CreateView):
 
       if not this_organiser_dept.exists() and department.exists():
         messages.error(self.request, "%s department is already assigened to organiser %s in your College." % (form.cleaned_data['department'], department.first().organiser))
-        print("form invalid: dept present ")
         return self.form_invalid(form)
-      try:
-        form_data = StudentBatch.objects.get(year=form_data.year, academic=form_data.academic, department=form_data.department)
-        print(" batch already exist")
-      except StudentBatch.DoesNotExist:
-        form_data.save()
+      form_data.save()
+      batch_name = StudentBatch.objects.get(pk=form_data.id).create_batch_name()
 
 
+    # StudentBatch.objects.get(pk=batch_id).update_student_count()
+    
     skipped, error, warning, write_flag = \
-      self.csv_email_validate(self.request.FILES['csv_file'], form_data.id , studentcount)
+      self.csv_email_validate(form.cleaned_data['csv_file'], form_data.id , studentcount)
     context = {'error' : error, 'warning' : warning, 'batch':form_data}
 
     if error or warning:
       return render(self.request, self.template_name, context)
-#    messages.success(self.request, "Student Batch added successfully.")
     return HttpResponseRedirect('/software-training/student-batch/%s/new/'%(str(form_data.id)))
-
-#  def get(self, request, *args, **kwargs):
-#    self.user = request.user
-#    form_class = self.get_form_class()
-#    form = self.get_form(form_class)
-#    context = {}
-#    context['form'] = form
-#    return self.render_to_response(context)
 
   def email_validator(self, email):
     if email and email.strip():
@@ -315,19 +305,16 @@ class StudentBatchCreateView(CreateView):
         return student
     return False
 
-  def csv_email_validate(self, file_path, batch_id , studentcount):
+  def csv_email_validate(self, file_data, batch_id , studentcount):
     skipped = []
     error = []
     warning = []
     write_flag = False
     stu_row_count = 0
     try:
-      file_data = file_path.read().decode('utf-8').splitlines()
       rowcsv = csv.reader(file_data, delimiter=',', quotechar='|')
       rowcount = len(list(rowcsv))
       gencount = studentcount + rowcount
-      print(('gencount',gencount))
-      print(('printing csv length',rowcount))
       if rowcount > 500:
         messages.warning(self.request, "MB will accept only 500 students, if number is more than 500, divide the batch and upload under different departments eg. Chemistry1 & Chemistry2")
       if gencount > 500:
@@ -336,7 +323,6 @@ class StudentBatchCreateView(CreateView):
         csvdata = csv.reader(file_data, delimiter=',', quotechar='|')
         for row in csvdata:
           stu_row_count = stu_row_count+1
-          print (stu_row_count)
           if len(row) < 4:
             skipped.append(row)
             continue
@@ -380,24 +366,24 @@ class StudentBatchUpdateView(UpdateView):
       return context
 
     def form_valid(self, form, **kwargs):
-      # Check if all student participate in selected foss
       try:
         if str(self.sb.year) == str(form.cleaned_data['year']) and str(self.sb.department) == str(form.cleaned_data['department']):
           return HttpResponseRedirect(self.success_url)
+        print('****************',form.cleaned_data['year'], self.request.user.organiser.academic.id)
+        print('****************',str(form.cleaned_data['department']))
 
-        sb = StudentBatch.objects.filter(
-          academic_id=self.request.user.organiser.academic.id,
+        sb = StudentBatch.objects.filter(~Q(organiser_id=self.request.user.organiser.id),
           department=form.cleaned_data['department'],
-          year = form.cleaned_data['year']
+          year = form.cleaned_data['year'],          
+          academic_id=self.request.user.organiser.academic.id
         )
-        if (sb.exists()):
-          sb = sb.first()
-          messages.warning(self.request, "%s - %s Batch is already chosen by Organiser %s in your College." % (sb.department, sb.year, sb.organiser))
+        print(sb)
+        if sb:
+          messages.warning(self.request, "%s - %s Batch is already chosen by another Organiser in your College." % (sb.department, sb.year))
           return self.form_invalid(form)
-        # Not sure do we wnat this option
-        # if sb.trainingrequest_set.exists():
-        #   messages.warning(self.request, '%s - %s Batch has Training. You can not edit this batch'% (sb.department, sb.year))
         form.save()
+        batch_name = StudentBatch.objects.get(pk=self.sb.id).create_batch_name()
+
 
       except:
         pass
@@ -418,11 +404,12 @@ class StudentBatchListView(ListView):
     self.queryset = StudentBatch.objects.filter(academic_id=self.request.user.organiser.academic_id)
     self.header = {
       1: SortableHeader('#', False),
-      2: SortableHeader('academic', True, 'Institution'),
-      3: SortableHeader('department', True, 'Department'),
-      4: SortableHeader('year', True, 'Year'),
-      5: SortableHeader('stcount', True, 'Student Count'),
-      6: SortableHeader('', False, ''),
+      2: SortableHeader('batch_name', True, 'Batch Name'),
+      3: SortableHeader('academic', True, 'Institution'),
+      4: SortableHeader('department', True, 'Department'),
+      5: SortableHeader('year', True, 'Year'),
+      6: SortableHeader('stcount', True, 'Student Count'),
+      7: SortableHeader('', False, ''),
     }
     self.raw_get_data = self.request.GET.get('o', None)
     self.queryset = get_sorted_list(self.request, self.queryset, self.header, self.raw_get_data)
@@ -631,6 +618,8 @@ class TrainingRequestEditView(CreateView):
 
       if self.training.batch.is_foss_batch_acceptable(selectedCourse):
         self.training.sem_start_date = form.cleaned_data['sem_start_date']
+        self.training.training_start_date = form.cleaned_data['training_start_date']
+        self.training.training_end_date = form.cleaned_data['training_end_date']
         self.training.course_id = selectedCourse
       else:
         messages.error(self.request, 'This student batch already taken the selected course.')
@@ -655,57 +644,6 @@ class TrainingRequestEditView(CreateView):
       return self.form_invalid(form)
     return HttpResponseRedirect('/software-training/select-participants/')
 
-"""class TrainingRequestEditView(CreateView):
-  form_class = TrainingRequestEditForm
-  template_name = None
-  user = None
-  training = None
-  @method_decorator(group_required("Organiser"))
-  def dispatch(self, *args, **kwargs):
-    if 'trid' in self.kwargs:
-      self.training = TrainingRequest.objects.get(pk=self.kwargs['trid'])
-    if not self.training.can_edit():
-      messages.error(self.request, "Training has attendance, edit is not permitted for training.")
-      return HttpResponseRedirect('/software-training/training-planner/')
-    return super(TrainingRequestEditView, self).dispatch(*args, **kwargs)
-
-  def get_form_kwargs(self):
-    kwargs = super(TrainingRequestEditView, self).get_form_kwargs()
-    kwargs.update({'training' : self.training})
-    kwargs.update({'user' : self.request.user})
-    return kwargs
-
-  def get_context_data(self, **kwargs):
-    context = super(TrainingRequestEditView, self).get_context_data(**kwargs)
-    context['training'] = self.training
-    return context
-
-  def form_valid(self, form, **kwargs):
-    # Check if all student participate in selected foss
-    try:
-      if self.training.batch.is_foss_batch_acceptable(form.cleaned_data['course']):
-        self.training.sem_start_date = form.cleaned_data['sem_start_date']
-        self.training.course_id = form.cleaned_data['course']
-        self.training.save()
-      else:
-        messages.error(self.request, 'This student batch already taken the selected course.')
-        return self.form_invalid(form)
-    except Exception as e:
-      print(e)
-      messages.error(self.request, 'Something went wrong, Contact site administrator.')
-      return self.form_invalid(form)
-    context = {}
-    return HttpResponseRedirect('/software-training/training-planner/')
-
-  def post(self, request, *args, **kwargs):
-    self.object = None
-    self.user = request.user
-    form_class = self.get_form_class()
-    form = self.get_form(form_class)
-    if form.is_valid():
-      return self.form_valid(form)
-    else:
-      return self.form_invalid(form)"""
 
 class TrainingAttendanceListView(ListView):
   queryset = StudentMaster.objects.none()
@@ -858,12 +796,13 @@ class TrainingCertificate(object):
     imgDoc = canvas.Canvas(imgTemp)
 
     # Title
-    imgDoc.setFont('Helvetica', 40, leading=None)
-    imgDoc.drawCentredString(415, 480, "Certificate of Participation")
+    imgDoc.setFont('Helvetica', 35, leading=None)
+    imgDoc.drawCentredString(405, 470, "Certificate of Participation")
 
     #date
-    imgDoc.setFont('Helvetica', 18, leading=None)
-    imgDoc.drawCentredString(211, 115, self.custom_strftime('%B {S} %Y', training_end))
+    if ta.training.department.id != 169:
+      imgDoc.setFont('Helvetica', 18, leading=None)
+      imgDoc.drawCentredString(211, 115, self.custom_strftime('%B {S} %Y', training_end))
 
     #password
     certificate_pass = ''
@@ -879,7 +818,8 @@ class TrainingCertificate(object):
     text = "This is to certify that <b>"+ta.student.user.first_name +" "+ta.student.user.last_name+"</b> participated in the <b>"+ta.training.course.foss.foss+"</b> training organized at <b>"+ta.training.training_planner.academic.institution_name+"</b> in <b>"+sem_start+"</b> semester, with course material provided by the Spoken Tutorial Project, IIT Bombay.<br /><br />A comprehensive set of topics pertaining to <b>"+ta.training.course.foss.foss+"</b> were covered in the training. This training is offered by the Spoken Tutorial Project, IIT Bombay, funded by the National Mission on Education through ICT, MHRD, Govt. of India."
     if ta.training.department.id == 24:
       text = "This is to certify that <b>"+ta.student.user.first_name +" "+ta.student.user.last_name+"</b> participated in the <b>"+ta.training.course.foss.foss+"</b> training organized at <b>"+ta.training.training_planner.academic.institution_name+"</b> by <b>"+ta.training.training_planner.organiser.user.first_name+" "+ta.training.training_planner.organiser.user.last_name+"</b>, with course material provided by the Spoken Tutorial Project, IIT Bombay.<br /><br />A comprehensive set of topics pertaining to <b>"+ta.training.course.foss.foss+"</b> were covered in the training. This training is offered by the Spoken Tutorial Project, IIT Bombay, funded by the National Mission on Education through ICT, MHRD, Govt. of India."
-
+    if ta.training.department.id == 169:
+      text = "This is to certify that <b>"+ta.student.user.first_name +" "+ta.student.user.last_name+"</b> has participated in <b>Faculty Development Programme</b> from <b>"+ str(ta.training.training_start_date) +"</b> to <b>"+ str(ta.training.training_end_date) +"</b> on <b>"+ta.training.course.foss.foss+"</b> organized by <b>"+ta.training.training_planner.academic.institution_name+"</b> with  course material provided by Spoken Tutorial Project, IIT Bombay.<br /><br /> This training is offered by the Spoken Tutorial Project, IIT Bombay, funded by the National Mission on Education through ICT, MHRD, Govt. of India."
 
     centered = ParagraphStyle(name = 'centered',
       fontSize = 16,
@@ -893,7 +833,10 @@ class TrainingCertificate(object):
     p.drawOn(imgDoc, 4.2 * cm, 7 * cm)
     imgDoc.save()
     # Use PyPDF to merge the image-PDF into the template
-    page = PdfFileReader(open(settings.MEDIA_ROOT +"Blank-Certificate.pdf","rb")).getPage(0)
+    if ta.training.department.id == 169:
+      page = PdfFileReader(open(settings.MEDIA_ROOT +"fdptr-certificate.pdf","rb")).getPage(0)
+    else:
+      page = PdfFileReader(open(settings.MEDIA_ROOT +"Blank-Certificate.pdf","rb")).getPage(0)
     overlay = PdfFileReader(BytesIO(imgTemp.getvalue())).getPage(0)
     page.mergePage(overlay)
 
@@ -1149,7 +1092,10 @@ class GetBatchOptionView(JSONResponseMixin, View):
     )
     batch_option = "<option value=''>---------</option>"
     for batch in batches:
-      batch_option += "<option value=" + str(batch.id) + ">" + str(batch) + "</option>"
+      if batch.batch_name:
+        batch_option += "<option value=" + str(batch.id) + ">" + str(batch.batch_name) + " Batch</option>"
+      else:
+        batch_option += "<option value=" + str(batch.id) + ">" + str(batch) + "</option>"
     context = {
       'batch_option' : batch_option,
     }
@@ -1216,14 +1162,15 @@ class GetDepartmentOrganiserStatusView(JSONResponseMixin, View):
     msg = ""
 
     try:
-      resultdata = StudentBatch.objects.get(
+      resultdata = StudentBatch.objects.filter(
+        ~Q(organiser_id = request.user.organiser.id),
         academic_id=request.user.organiser.academic.id,
         department_id=department_id,
         year = year
       )
-      dept_status = False
-      org_name = resultdata.organiser.user.first_name+" "+resultdata.organiser.user.last_name
-      msg = "This department with selected year is already chosen by another Organiser "+org_name+" in your College."
+      if resultdata:
+        dept_status = False
+        msg = "This department with selected year is already chosen by another Organiser in your College."
     except ObjectDoesNotExist:
       pass
 
@@ -3276,12 +3223,13 @@ class AllTrainingCertificateView(TrainingCertificate, View):
       imgDoc = canvas.Canvas(imgTemp)
 
       # Title
-      imgDoc.setFont('Helvetica', 40, leading=None)
-      imgDoc.drawCentredString(415, 480, "Certificate of Participation")
+      imgDoc.setFont('Helvetica', 35, leading=None)
+      imgDoc.drawCentredString(405, 480, "Certificate of Participation")
 
       #date
-      imgDoc.setFont('Helvetica', 18, leading=None)
-      imgDoc.drawCentredString(211, 115, self.custom_strftime('%B {S} %Y', training_end))
+      if ta.training.department.id != 169:
+        imgDoc.setFont('Helvetica', 18, leading=None)
+        imgDoc.drawCentredString(211, 115, self.custom_strftime('%B {S} %Y', training_end))
 
       #password
       certificate_pass = ''
@@ -3297,6 +3245,8 @@ class AllTrainingCertificateView(TrainingCertificate, View):
       text = "This is to certify that <b>"+ta.student.user.first_name +" "+ta.student.user.last_name+"</b> participated in the <b>"+ta.training.course.foss.foss+"</b> training organized at <b>"+ta.training.training_planner.academic.institution_name+"</b> in <b>"+sem_start+"</b> semester, with course material provided by the Spoken Tutorial Project, IIT Bombay.<br /><br />A comprehensive set of topics pertaining to <b>"+ta.training.course.foss.foss+"</b> were covered in the training. This training is offered by the Spoken Tutorial Project, IIT Bombay, funded by the National Mission on Education through ICT, MHRD, Govt. of India."
       if ta.training.department.id == 24:
         text = "This is to certify that <b>"+ta.student.user.first_name +" "+ta.student.user.last_name+"</b> participated in the <b>"+ta.training.course.foss.foss+"</b> training organized at <b>"+ta.training.training_planner.academic.institution_name+"</b> by <b>"+ta.training.training_planner.organiser.user.first_name+" "+ta.training.training_planner.organiser.user.last_name+"</b>, with course material provided by the Spoken Tutorial Project, IIT Bombay.<br /><br />A comprehensive set of topics pertaining to <b>"+ta.training.course.foss.foss+"</b> were covered in the training. This training is offered by the Spoken Tutorial Project, IIT Bombay, funded by the National Mission on Education through ICT, MHRD, Govt. of India."
+      if ta.training.department.id == 169:
+        text = "This is to certify that <b>"+ta.student.user.first_name +" "+ta.student.user.last_name+"</b> has participated in <b>Faculty Development Programme</b> from <b>"+ str(ta.training.training_start_date) +"</b> to <b>"+ str(ta.training.training_end_date) +"</b> on <b>"+ta.training.course.foss.foss+"</b> organized by <b>"+ta.training.training_planner.academic.institution_name+"</b> with  course material provided by Spoken Tutorial Project, IIT Bombay.<br /><br /> This training is offered by the Spoken Tutorial Project, IIT Bombay, funded by the National Mission on Education through ICT, MHRD, Govt. of India."
 
 
       centered = ParagraphStyle(name = 'centered',
@@ -3311,7 +3261,11 @@ class AllTrainingCertificateView(TrainingCertificate, View):
       p.drawOn(imgDoc, 4.2 * cm, 7 * cm)
       imgDoc.save()
       # Use PyPDF to merge the image-PDF into the template
-      page = PdfFileReader(open(settings.MEDIA_ROOT +"Blank-Certificate.pdf","rb")).getPage(0)
+      if ta.training.department.id == 169:
+        page = PdfFileReader(open(settings.MEDIA_ROOT +"fdptr-certificate.pdf","rb")).getPage(0)
+      else:
+        page = PdfFileReader(open(settings.MEDIA_ROOT +"Blank-Certificate.pdf","rb")).getPage(0)
+      
       overlay = PdfFileReader(BytesIO(imgTemp.getvalue())).getPage(0)
       page.mergePage(overlay)
 

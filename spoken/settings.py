@@ -96,7 +96,10 @@ INSTALLED_APPS = [
     'corsheaders',
     'ckeditor',
     'cron',
+<<<<<<< HEAD
     'logs',
+=======
+>>>>>>> upstream_master
 ]
 
 
@@ -344,6 +347,11 @@ CACHES = {
     }
 }
 
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> upstream_master
 CELERY_BROKER_URL = 'redis://localhost:6379/0'
 CELERY_RESULT_BACKEND = 'redis://localhost:6379/1'
 CELERY_ACCEPT_CONTENT = ['application/json']
@@ -356,19 +364,16 @@ CKEDITOR_CONFIGS = {
     'default': {
         'height': 150,
         'width': 600,
-        'toolbar': 'Full',
-        'toolbar_Custom': [
-            ['Bold', 'Italic', 'Underline'],
-            ['NumberedList', 'BulletedList', 'JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock'],
-            ['Link', 'Unlink'],
-            ['TextColor', 'BGColor'],
-            [ 'Source']
-        ]
+        'toolbar': 'Full'
     }
 }
 
-ANALYTICS_DATA = ''
+DATA_UPLOAD_MAX_NUMBER_FIELDS = DATA_UPLOAD_MAX_NUMBER_FIELDS
 
-SESSION_EXPIRE_AT_BROWSER_CLOSE = False  # required for checking returning visits
 
-LOGS_API_URL = 'http://127.0.0.1:8001/'
+REST_FRAMEWORK = {
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+    ],
+}
+
